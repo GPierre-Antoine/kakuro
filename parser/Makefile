@@ -6,3 +6,4 @@ parser: parser.o main.cpp
 
 clean:
 	rm -f parser *.o
+	rm -rf parser.dSYM
