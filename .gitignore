@@ -1,2 +1,5 @@
 cmake-build-debug/
 projet.pdf
+*.o
+parser/parser.dSYM/
+parser/parser
