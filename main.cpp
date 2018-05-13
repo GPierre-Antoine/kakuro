@@ -1,5 +1,6 @@
-#include "src/parser.h"
 #include <iostream>
+
+#include "src/parser.h"
 
 using std::cerr;
 using std::endl;
