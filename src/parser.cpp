@@ -27,10 +27,10 @@ void parser::parse(char *nom_fichier) {
     int arite;        /* l'arité d'une contrainte */
     int i, j;          /* des compteurs de boucle */
 
-    filestream.open(nom_fichier,std::ifstream::in);
+    filestream.open(nom_fichier, std::ifstream::in);
 
     if (!filestream.is_open()) {
-        throw std::runtime_error(std::string("Fichier ") + nom_fichier +  " non trouve");
+        throw std::runtime_error(std::string("Fichier ") + nom_fichier + " non trouve");
     }
 
     /* on calcule la taille de la grille */
@@ -39,7 +39,7 @@ void parser::parse(char *nom_fichier) {
     nb_colonnes = 0;
     filestream.get(c);
 
-    while (c) {
+    while (!filestream.eof()) {
         if (c == '\n')
             nb_lignes++;
         else if ((nb_lignes == 0) && ((c == '.') || (c == '\\')))
@@ -52,12 +52,12 @@ void parser::parse(char *nom_fichier) {
     /* remplissage de la grille */
 
     grille = (Case **) malloc(sizeof(Case *) * nb_lignes);
-    for (num_ligne = 0; num_ligne < nb_lignes; num_ligne++)
+    for (num_ligne = 0; num_ligne < nb_lignes; num_ligne++) {
         grille[num_ligne] = (Case *) malloc(sizeof(Case) * nb_colonnes);
+    }
 
+    filestream.clear();
     filestream.seekg(0, std::ios::beg);
-
-
 
     num_ligne = 0;
     num_colonne = 0;
@@ -65,12 +65,14 @@ void parser::parse(char *nom_fichier) {
 
     filestream.get(c);
 
-    while (c) {
+    while (!filestream.eof()) {
         if (c == '\n') {
             num_ligne++;
             num_colonne = 0;
         } else if (c == ' ')
+        {
             num_colonne++;
+        }
         else if (c == '.')     /* case blanche */
         {
             grille[num_ligne][num_colonne].coul = BLANCHE;
@@ -123,12 +125,11 @@ void parser::parse(char *nom_fichier) {
                 filestream.putback(c);
             }
         }
-
         filestream.get(c);
     }
     filestream.close();
 
-    printf("Nombre de variables trouvées : %d\n", nb_variables);
+    cout << "Nombre de variables trouvées : " << nb_variables << endl;
 
 
     /* on crée les contraintes */
