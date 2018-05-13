@@ -219,24 +219,33 @@ void parser::parse(char *nom_fichier)
     }
 }
 
-/* fonctions à compléter pour remplir vos structures de données */
+/*
+ * fonctions à compléter pour remplir vos structures de données
+ */
 
 
+/**
+ * fonction permettant la création d'une nouvelle variable ayant pour numéro num
+ */
 void parser::Variable(std::size_t num)
-/* fonction permettant la création d'une nouvelle variable ayant pour numéro num */
 {
     cout << "Variable " << num << endl;
 }
 
+/**
+ * fonction permettant la création d'une nouvelle contrainte binaire de différence entre les variables var1 et var2
+ */
+
 void parser::Contrainte_Difference(std::size_t var1, std::size_t var2)
-/* fonction permettant la création d'une nouvelle contrainte binaire de différence entre les variables var1 et var2*/
 {
     cout << "Contrainte binaire de difference entre " << var1 << " et " << var2 << endl;
 }
 
+/**
+ * fonction permettant la création d'une nouvelle contrainte n-aire de somme portant sur les variables contenant
+ * dans le tableau portee de taille arite et dont la valeur est val
+ */
 void parser::Contrainte_Somme(Portee portee, std::size_t arite, std::size_t val)
-/* fonction permettant la création d'une nouvelle contrainte n-aire de somme portant sur les variables contenant
- * dans le tableau portee de taille arite et dont la valeur est val */
 {
     cout << "Contrainte n-aire de somme portant sur";
     for (std::size_t i = 0; i < arite; i++)
