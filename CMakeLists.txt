@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS "-O3 -W -Wall -Wextra --pedantic -Wno-comment -Werror")
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-endif(CMAKE_BUILD_TYPE MATCHES "Debug")
+endif (CMAKE_BUILD_TYPE MATCHES "Debug")
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Module")
