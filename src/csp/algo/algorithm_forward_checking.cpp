@@ -85,7 +85,7 @@ void csp::algorithm_forward_checking::release_automatic_assignations(typename st
     {
         vector.pop_back();
     }
-    while (*it_variable != *(vector.back().get_record()))
+    while (!vector.back().compare_record(*it_variable))
     {
         std::advance(it_variable, -1);
     }

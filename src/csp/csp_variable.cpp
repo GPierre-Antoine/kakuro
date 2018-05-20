@@ -36,22 +36,6 @@ bool csp::csp_variable::is_valuated() const
     return domain.begin() <= domain_start && domain_start <= value && value < domain.end();
 }
 
-bool csp::csp_variable::restrict(const std::size_t &index)
-{
-    auto it = get_free_iterator(index);
-    if (it == domain.end())
-    {
-        //value is locked
-        return false;
-    }
-    if (it != domain_start)
-    {
-        std::iter_swap(it, domain_start);
-    }
-    restrict_first();
-    return true;
-}
-
 void csp::csp_variable::restrict_first()
 {
     std::advance(domain_start, 1);
@@ -106,9 +90,26 @@ csp::csp_variable::csp_variable(const csp::csp_variable &other) : id(other.get_i
 
 }
 
+bool csp::csp_variable::restrict(const std::size_t &index, std::vector<record>&vector)
+{
+    auto it = get_free_iterator(index);
+    if (it == domain.end())
+    {
+        //value is locked
+        return false;
+    }
+    if (it != domain_start)
+    {
+        std::iter_swap(it, domain_start);
+    }
+    restrict_first();
+    vector.emplace_back(record(record_type::automatic,*this));
+    return true;
+}
+
 bool csp::csp_variable::restrict_not(const std::size_t &index, std::vector<csp::record> &vector)
 {
-    auto it = std::find(domain_start, domain.end(), index);
+    auto it = get_free_iterator(index);
     auto correction = 0;
     if (it != domain.end())
     {

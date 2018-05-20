@@ -42,7 +42,7 @@ namespace csp
 
         std::size_t get_available_domain_size() const;
 
-        bool restrict(const std::size_t &index);
+        bool restrict(const std::size_t &index, std::vector<record>&vector);
         bool restrict_not(const std::size_t &index, std::vector<record>&vector);
 
         void restrict_first();

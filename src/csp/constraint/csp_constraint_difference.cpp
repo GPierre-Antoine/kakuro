@@ -18,5 +18,10 @@ bool csp::csp_constraint_difference::run_constraint() const
 
 void csp::csp_constraint_difference::run_fc_child(std::vector<csp::record> &history) const
 {
-
+    auto free = get_unvaluated_variable();
+    for (auto i:associated_variables){
+        if (i->is_valuated()){
+            free->restrict(i->get_value(),history);
+        }
+    }
 }
