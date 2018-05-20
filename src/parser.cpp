@@ -227,18 +227,18 @@ void parser::parse(char *nom_fichier)
     }
 
     auto algo = csp::algorithm_backtrack();
-    auto solutions = algo.run(variables,constraints);
+    auto affectations = algo.run(variables,constraints);
 
-    cout << "Solutions found : " << solutions.size() << endl;
-    auto s_n = 0u;
-    for (const auto &solution:solutions)
+    cout << "Affectations found : " << affectations.size() << endl;
+    auto solution_number = 0u;
+    for (const auto &solution:affectations)
     {
 
         std::string text="";
         for (const auto&value:solution){
             text+="{" +std::to_string(value) + "}";
         }
-        cout << "Solution #" << std::setfill('0') <<std::setw(3) << std::to_string(++s_n) << " : " << text << endl;
+        cout << "Solution #" << std::setfill('0') <<std::setw(3) << std::to_string(++solution_number) << " : " << text << endl;
     }
 
 }

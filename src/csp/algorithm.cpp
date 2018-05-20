@@ -5,13 +5,13 @@
 
 #include "algorithm.h"
 
-void csp::algorithm::record_solution(std::vector<std::vector<std::size_t>> &solutions,
+void csp::algorithm::record_solution(std::vector<std::vector<std::size_t>> &affectations,
                                      const std::vector<csp::csp_variable> &variables) const
 {
-    std::vector<std::size_t> solution(variables.size());
+    std::vector<std::size_t> affectation(variables.size());
     for (const auto &v : variables)
     {
-        solution[v.get_id()] = v.get_value();
+        affectation[v.get_id()] = v.get_value();
     }
-    solutions.push_back(solution);
+    affectations.push_back(affectation);
 }
