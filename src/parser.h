@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include <vector>
-#include <unordered_map>
+#include <memory>
 
 
 #include "csp/csp_variable.h"
@@ -14,7 +14,7 @@ class parser
 {
 private:
     std::vector<csp::csp_variable> variables;
-    std::vector<csp::csp_constraint> constraints;
+    std::vector<std::unique_ptr<csp::csp_constraint>> constraints;
 public:
     void parse(char *nom_fichier);
 

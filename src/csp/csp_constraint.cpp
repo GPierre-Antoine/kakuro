@@ -16,47 +16,47 @@ bool csp::csp_constraint::associated_variable_are_valuated() const
     }
     return true;
 }
-csp::csp_constraint::csp_constraint(variable_ref &vector, std::size_t sum) : sum(sum), associated_variables(vector)
+
+csp::csp_constraint::csp_constraint(std::vector<csp::csp_variable *> &vector) : associated_variables(vector)
 {
 
 }
-bool csp::csp_constraint::run_constraint() const
+
+bool csp::csp_constraint::one_variable_left_unvaluated() const
 {
-    if (sum)
-    {
-        return constraint_sum();
-    }
-    return constraint_diff();
-}
-bool csp::csp_constraint::constraint_sum() const
-{
-    std::size_t accumulation = 0;
+    std::size_t counter{0};
     for (const auto &i:associated_variables)
     {
-        accumulation += i->get_value();
+        if (!i->is_valuated())
+        {
+            ++counter;
+        }
     }
-    return sum == accumulation;
-}
-bool csp::csp_constraint::constraint_diff() const
-{
-    return associated_variables[0]->get_value() != associated_variables[1]->get_value();
+    return counter == 1;
 }
 
-std::ostream &csp::operator<<(std::ostream &f, const csp::csp_constraint &constraint)
+csp::csp_variable *csp::csp_constraint::get_unvaluated_variable() const
 {
-    std::string text = "";
-    if (constraint.sum)
+    if (!one_variable_left_unvaluated())
     {
-        text+="Sum Constraint ("+std::to_string(constraint.sum)+") ";
+        throw std::runtime_error("More than one variable left");
     }
-    else
+    for (auto &i:associated_variables)
     {
-        text+="Diff Constraint ";
+        if (!i->is_valuated())
+        {
+            return i;
+        }
     }
-    f << text;
-    for (const auto &i:constraint.associated_variables)
-    {
-        f << *i << " ";
-    }
-    return f;
+    // impossible
+    return nullptr;
 }
+void csp::csp_constraint::run_fc(std::vector<csp::record> &r) const
+{
+    if (!one_variable_left_unvaluated())
+    {
+        throw std::runtime_error("More than one variable left");
+    }
+    run_fc_child(r);
+}
+

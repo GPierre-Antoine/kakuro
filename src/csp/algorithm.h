@@ -7,6 +7,7 @@
 
 
 #include <cstddef>
+#include <memory>
 #include <vector>
 
 #include "csp_variable.h"
@@ -19,7 +20,7 @@ namespace csp
     protected:
         void record_solution(std::vector<std::vector<std::size_t>> & affectations, const std::vector<csp::csp_variable> & variables) const;
     public:
-        virtual std::vector<std::vector<size_t>> run(std::vector<csp::csp_variable> & variables, const std::vector<csp::csp_constraint>&constraints) const=0;
+        virtual std::vector<std::vector<size_t>> run(std::vector<csp::csp_variable> & variables, const std::vector<std::unique_ptr<csp::csp_constraint>>&constraints) const=0;
     };
 }
 

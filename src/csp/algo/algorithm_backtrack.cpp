@@ -3,9 +3,10 @@
 //
 
 
+#include <memory>
 #include "algorithm_backtrack.h"
 
-std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(std::vector<csp::csp_variable> & variables, const std::vector<csp::csp_constraint>&constraints) const
+std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(std::vector<csp::csp_variable> & variables, const std::vector<std::unique_ptr<csp::csp_constraint>>&constraints) const
 {
     for (auto&i:variables)
         i.release_all();
@@ -15,11 +16,6 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(std::vector<csp::
 
     while (true)
     {
-        for (const auto&variable:variables){
-            if (!variable.is_valuated())
-                break;
-        }
-
         if (it_variable == variables.end())
             break;
 
@@ -44,7 +40,7 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(std::vector<csp::
         bool met_error = false;
         for (const auto &constraint : constraints)
         {
-            if (constraint.associated_variable_are_valuated() && !constraint.run_constraint())
+            if (constraint->associated_variable_are_valuated() && !constraint->run_constraint())
             {
                 met_error = true;
                 break;

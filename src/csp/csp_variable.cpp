@@ -10,6 +10,8 @@
 #include <algorithm>
 #include "csp_variable.h"
 
+#include "algo/record.h"
+
 csp::csp_variable::csp_variable(const std::size_t &s) : id(s), domain_start(domain.begin())
 {
 }
@@ -19,10 +21,6 @@ std::size_t csp::csp_variable::get_id() const
     return id;
 }
 
-typename std::pair<domain_t::const_iterator, domain_t::const_iterator> csp::csp_variable::get_domain() const
-{
-    return make_pair(domain_start, domain.end());
-}
 std::size_t csp::csp_variable::get_value() const
 {
     if (!is_valuated())
@@ -38,42 +36,30 @@ bool csp::csp_variable::is_valuated() const
     return domain.begin() <= domain_start && domain_start <= value && value < domain.end();
 }
 
-void csp::csp_variable::restrict(const std::size_t &index)
+bool csp::csp_variable::restrict(const std::size_t &index)
 {
     auto it = get_free_iterator(index);
     if (it == domain.end())
     {
         //value is locked
-        return;
+        return false;
     }
     if (it != domain_start)
     {
         std::iter_swap(it, domain_start);
     }
     restrict_first();
+    return true;
 }
 
 void csp::csp_variable::restrict_first()
 {
-    domain_start += 1;
-}
-
-void csp::csp_variable::release(const std::size_t &index)
-{
-    auto it = get_locked_iterator(index);
-    if (it == domain_start)
-    {
-        //value is free
-        return;
-    }
-    std::iter_swap(it, domain_start);
-    release_last();
-
+    std::advance(domain_start, 1);
 }
 
 void csp::csp_variable::release_last()
 {
-    domain_start -= 1;
+    std::advance(domain_start, -1);
 }
 
 typename domain_t::iterator csp::csp_variable::get_free_iterator(const std::size_t &index)
@@ -97,9 +83,9 @@ void csp::csp_variable::set_value(const std::size_t &index)
     }
     if (it != domain_start)
     {
-        std::iter_swap(it, domain_start);
+        std::iter_swap(it, domain.end());
     }
-    value = domain_start;
+    value = domain.end();
 }
 
 void csp::csp_variable::get_first_as_value()
@@ -115,12 +101,28 @@ void csp::csp_variable::release_all()
     domain_start = domain.begin();
     value = domain.cend();
 }
-
-std::ostream &csp::operator<<(std::ostream &f, const csp::csp_variable &var)
+csp::csp_variable::csp_variable(const csp::csp_variable &other) : id(other.get_id())
 {
-    return f <<std::string("variable n°")
-        + std::to_string(var.get_id())
-        + " "
-        + (var.is_valuated() ? "{" + std::to_string(var.get_value()) + "}" : " {}");
+
 }
+
+bool csp::csp_variable::restrict_not(const std::size_t &index, std::vector<csp::record> &vector)
+{
+    auto it = std::find(domain_start, domain.end(), index);
+    auto correction = 0;
+    if (it != domain.end())
+    {
+        std::iter_swap(it, std::prev(domain.end(), 1));
+        correction = 1;
+    }
+
+    while (get_available_domain_size() - correction > 0)
+    {
+        restrict_first();
+        vector.emplace_back(record(record_type::automatic, *this));
+    }
+    return get_available_domain_size() == 1;
+}
+
+
 

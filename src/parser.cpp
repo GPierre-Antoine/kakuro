@@ -12,6 +12,9 @@
 #include "Couleur.h"
 #include "Case.h"
 #include "csp/algo/algorithm_backtrack.h"
+#include "csp/constraint/csp_constraint_sum.h"
+#include "csp/constraint/csp_constraint_difference.h"
+#include "../cpp11_compat.h"
 
 using std::cerr;
 using std::cout;
@@ -265,7 +268,7 @@ void parser::constraint_difference(std::size_t var1, std::size_t var2)
 {
     cout << "Contrainte binaire de difference entre " << var1 << " et " << var2 << endl;
     std::vector<csp::csp_variable *> holder{&variables.at(var1), &variables.at(var2)};
-    constraints.emplace_back(csp::csp_constraint(holder));
+    constraints.emplace_back(make_unique<csp::csp_constraint_difference>(holder));
 }
 
 /**
@@ -282,6 +285,6 @@ void parser::constraint_sum(std::vector<std::size_t> portee, std::size_t arite, 
         holder.push_back(&variables.at(portee[index]));
         cout << " " << portee[index];
     }
-    constraints.emplace_back(csp::csp_constraint(holder, sum));
+    constraints.emplace_back(make_unique<csp::csp_constraint_sum>(holder, sum));
     cout << " et de valeur " << sum << endl;
 }

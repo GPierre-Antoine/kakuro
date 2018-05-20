@@ -9,21 +9,24 @@
 #include <initializer_list>
 
 #include "csp_variable.h"
-typedef std::vector<csp::csp_variable*> variable_ref;
+#include "algo/record.h"
 
 namespace csp
 {
     class csp_constraint
     {
     public:
-        const std::size_t sum;
-        const variable_ref associated_variables;
-        bool associated_variable_are_valuated() const;
-        explicit csp_constraint(variable_ref & vector, std::size_t sum = 0);
-        bool run_constraint() const;
-        bool constraint_diff() const;
-        bool constraint_sum() const;
-    };
+        const std::vector<csp::csp_variable*> associated_variables;
 
-    std::ostream& operator<<(std::ostream&f, const csp::csp_constraint&constraint);
+        bool associated_variable_are_valuated() const;
+        bool one_variable_left_unvaluated() const;
+
+        csp_variable* get_unvaluated_variable() const;
+
+        void run_fc(std::vector<csp::record>& r) const;
+        virtual void run_fc_child(std::vector<csp::record>& r) const=0;
+
+        explicit csp_constraint(std::vector<csp::csp_variable*> & vector);
+        virtual bool run_constraint() const=0;
+    };
 }
