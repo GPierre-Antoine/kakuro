@@ -4,10 +4,13 @@
 #include <vector>
 #include <limits>
 #include <cassert>
+#include <algorithm>
+#include <iomanip>
 
 #include "parser.h"
 #include "Couleur.h"
 #include "Case.h"
+#include "csp/algo/algorithm_backtrack.h"
 
 using std::cerr;
 using std::cout;
@@ -15,6 +18,11 @@ using std::endl;
 
 typedef std::vector<Case> CaseLine;
 typedef std::vector<CaseLine> CaseGrid;
+
+bool csp_variable_sort(const csp::csp_variable &v1, const csp::csp_variable &v2)
+{
+    return v1.get_id() < v2.get_id();
+}
 
 void parser::parse(char *nom_fichier)
 {
@@ -29,7 +37,7 @@ void parser::parse(char *nom_fichier)
     std::size_t somme;        /* une somme */
 
     CaseGrid grid;
-    Portee portee;     /* la portee d'une contrainte */
+    std::vector<std::size_t> portee;     /* la portee d'une contrainte */
     std::size_t arite;        /* l'arité d'une contrainte */
     std::size_t i, j;          /* des compteurs de boucle */
 
@@ -107,8 +115,7 @@ void parser::parse(char *nom_fichier)
         {
             grid[num_ligne][num_colonne].coul = BLANCHE;
             grid[num_ligne][num_colonne].num = nb_variables;
-            Variable(nb_variables);
-
+            make_variable(nb_variables);
             nb_variables++;
         }
         else if (c == '\\')    /* case noire de la forme \y ou \ */
@@ -154,7 +161,8 @@ void parser::parse(char *nom_fichier)
     filestream.close();
 
     cout << "Nombre de variables trouvées : " << nb_variables << endl;
-
+    std::sort(variables.begin(), variables.end(), csp_variable_sort);
+    constraints.reserve(3 * nb_variables);
 
     /* on crée les contraintes */
 
@@ -185,13 +193,13 @@ void parser::parse(char *nom_fichier)
                         j = i + 1;
                         while ((j < nb_colonnes) && (grid[num_ligne][j].is_white()))
                         {
-                            Contrainte_Difference(grid[num_ligne][i].num, grid[num_ligne][j].num);
+                            constraint_difference(grid[num_ligne][i].num, grid[num_ligne][j].num);
                             j++;
                         }
                         i++;
                     }
 
-                    Contrainte_Somme(portee, arite, grid[num_ligne][num_colonne].somme_horizontale);
+                    constraint_sum(portee, arite, grid[num_ligne][num_colonne].somme_horizontale);
                 }
 
                 if (grid[num_ligne][num_colonne].somme_verticale != std::numeric_limits<std::size_t>::max())
@@ -206,17 +214,33 @@ void parser::parse(char *nom_fichier)
                         j = i + 1;
                         while ((j < nb_lignes) && (grid[j][num_colonne].is_white()))
                         {
-                            Contrainte_Difference(grid[i][num_colonne].num, grid[j][num_colonne].num);
+                            constraint_difference(grid[i][num_colonne].num, grid[j][num_colonne].num);
                             j++;
                         }
                         i++;
                     }
 
-                    Contrainte_Somme(portee, arite, grid[num_ligne][num_colonne].somme_verticale);
+                    constraint_sum(portee, arite, grid[num_ligne][num_colonne].somme_verticale);
                 }
             }
         }
     }
+
+    auto algo = csp::algorithm_backtrack();
+    auto solutions = algo.run(variables,constraints);
+
+    cout << "Solutions found : " << solutions.size() << endl;
+    auto s_n = 0u;
+    for (const auto &solution:solutions)
+    {
+
+        std::string text="";
+        for (const auto&value:solution){
+            text+="{" +std::to_string(value) + "}";
+        }
+        cout << "Solution #" << std::setfill('0') <<std::setw(3) << std::to_string(++s_n) << " : " << text << endl;
+    }
+
 }
 
 /*
@@ -227,30 +251,37 @@ void parser::parse(char *nom_fichier)
 /**
  * fonction permettant la création d'une nouvelle variable ayant pour numéro num
  */
-void parser::Variable(std::size_t num)
+void parser::make_variable(std::size_t num)
 {
     cout << "Variable " << num << endl;
+    variables.emplace_back(csp::csp_variable(num));
 }
 
 /**
  * fonction permettant la création d'une nouvelle contrainte binaire de différence entre les variables var1 et var2
  */
 
-void parser::Contrainte_Difference(std::size_t var1, std::size_t var2)
+void parser::constraint_difference(std::size_t var1, std::size_t var2)
 {
     cout << "Contrainte binaire de difference entre " << var1 << " et " << var2 << endl;
+    std::vector<csp::csp_variable *> holder{&variables.at(var1), &variables.at(var2)};
+    constraints.emplace_back(csp::csp_constraint(holder));
 }
 
 /**
  * fonction permettant la création d'une nouvelle contrainte n-aire de somme portant sur les variables contenant
  * dans le tableau portee de taille arite et dont la valeur est val
  */
-void parser::Contrainte_Somme(Portee portee, std::size_t arite, std::size_t val)
+void parser::constraint_sum(std::vector<std::size_t> portee, std::size_t arite, std::size_t sum)
 {
     cout << "Contrainte n-aire de somme portant sur";
+    std::vector<csp::csp_variable *> holder;
+    holder.reserve(arite);
     for (std::size_t i = 0; i < arite; i++)
     {
+        holder.push_back(&variables.at(portee[i]));
         cout << " " << portee[i];
     }
-    cout << " et de valeur " << val << endl;
+    constraints.emplace_back(csp::csp_constraint(holder, sum));
+    cout << " et de valeur " << sum << endl;
 }

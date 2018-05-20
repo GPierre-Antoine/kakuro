@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    parser p;
+    parser p{};
 
     try {
         p.parse(argv[1]);
