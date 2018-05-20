@@ -10,7 +10,7 @@ std::vector<std::vector<size_t>> csp::algorithm_forward_checking::run(std::vecto
     for (auto&i:variables)
         i.release_all();
 
-    auto it_variable = variables.begin();
+//    auto it_variable = variables.begin();
     std::vector<std::vector<size_t>> solutions;
     return  solutions;
 }
