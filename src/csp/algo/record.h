@@ -20,7 +20,7 @@ namespace csp
         record&operator=(const record& r) = default;
         bool is_manual () const;
         const csp_variable& get_record() const;
-        bool compare_record(const csp_variable&variable) const;
+        bool is_same_variable(const csp_variable &variable) const;
         void forget();
         ~record();
     };

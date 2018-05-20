@@ -9,6 +9,7 @@
 #include "csp/csp_variable.h"
 #include "csp/constraint/csp_constraint_sum.h"
 #include "csp/constraint/csp_constraint_difference.h"
+#include "csp/algorithm.h"
 
 
 namespace csp

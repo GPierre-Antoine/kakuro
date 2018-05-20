@@ -16,7 +16,7 @@ bool csp::csp_constraint_difference::run_constraint() const
     return associated_variables[0]->get_value() != associated_variables[1]->get_value();
 }
 
-void csp::csp_constraint_difference::run_fc_child(std::vector<csp::record> &history) const
+csp::csp_variable * csp::csp_constraint_difference::run_fc_child(std::vector<csp::record> &history) const
 {
     auto free = get_unvaluated_variable();
     for (auto i:associated_variables){
@@ -24,4 +24,5 @@ void csp::csp_constraint_difference::run_fc_child(std::vector<csp::record> &hist
             free->restrict(i->get_value(),history);
         }
     }
+    return free;
 }

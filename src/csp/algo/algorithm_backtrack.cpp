@@ -6,10 +6,13 @@
 #include <memory>
 #include "algorithm_backtrack.h"
 
-std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(std::vector<csp::csp_variable> & variables, const std::vector<std::unique_ptr<csp::csp_constraint>>&constraints) const
+std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(std::vector<csp::csp_variable> &variables,
+                                                               const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints) const
 {
-    for (auto&i:variables)
+    for (auto &i:variables)
+    {
         i.release_all();
+    }
 
     auto it_variable = variables.begin();
     std::vector<std::vector<size_t>> solutions;
@@ -17,7 +20,9 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(std::vector<csp::
     while (true)
     {
         if (it_variable == variables.end())
+        {
             break;
+        }
 
         //si variable courante a domaine vide
         if (!it_variable->get_available_domain_size())
@@ -29,7 +34,7 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(std::vector<csp::
             }
             //sinon, on libère le domaine et on retourne à la variable précédente, puis on repart du début de la boucle
             it_variable->release_all();
-            it_variable = std::prev(it_variable,1);
+            it_variable = std::prev(it_variable, 1);
             it_variable->restrict_first();
             continue;
         }
@@ -52,13 +57,18 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(std::vector<csp::
             it_variable->restrict_first();
             continue;
         }
-        it_variable = std::next(it_variable,1);
-        if (it_variable == variables.end()){
+        it_variable = std::next(it_variable, 1);
+        if (it_variable == variables.end())
+        {
             record_solution(solutions, variables);
-            it_variable = std::prev(it_variable,1);
+            it_variable = std::prev(it_variable, 1);
             it_variable->restrict_first();
         }
     }
 
     return solutions;
+}
+csp::algorithm_backtrack::algorithm_backtrack() : algorithm(std::string("Backtrack"))
+{
+
 }

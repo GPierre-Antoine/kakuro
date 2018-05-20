@@ -21,7 +21,7 @@ bool csp::csp_constraint_sum::run_constraint() const
     }
     return sum == accumulation;
 }
-void csp::csp_constraint_sum::run_fc_child(std::vector<csp::record> &history) const
+csp::csp_variable * csp::csp_constraint_sum::run_fc_child(std::vector<csp::record> &history) const
 {
     auto free = get_unvaluated_variable();
     std::size_t partial_sum = 0u;
@@ -34,5 +34,5 @@ void csp::csp_constraint_sum::run_fc_child(std::vector<csp::record> &history) co
     }
     std::size_t expected_value = static_cast<std::size_t >(std::max(static_cast<long>(sum - partial_sum), 0l));
     free->restrict_not(expected_value, history);
-
+    return free;
 }

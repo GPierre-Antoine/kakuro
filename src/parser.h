@@ -8,6 +8,7 @@
 
 #include "csp/csp_variable.h"
 #include "csp/csp_constraint.h"
+#include "csp/algorithm.h"
 
 
 class parser
@@ -38,6 +39,8 @@ public:
      * @param sum
      */
     void constraint_sum(std::vector<std::size_t> portee, std::size_t arite, std::size_t sum);
+
+    void run_algorithm(const csp::algorithm & algo,std::vector<csp::csp_variable> & variables, const std::vector<std::unique_ptr<csp::csp_constraint>>&constraints);
 
     parser() = default;
 };

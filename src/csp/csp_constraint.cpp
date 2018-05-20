@@ -51,12 +51,12 @@ csp::csp_variable *csp::csp_constraint::get_unvaluated_variable() const
     // impossible
     return nullptr;
 }
-void csp::csp_constraint::run_fc(std::vector<csp::record> &r) const
+csp::csp_variable * csp::csp_constraint::run_fc(std::vector<csp::record> &r) const
 {
     if (!one_variable_left_unvaluated())
     {
         throw std::runtime_error("More than one variable left");
     }
-    run_fc_child(r);
+    return run_fc_child(r);
 }
 

@@ -24,7 +24,7 @@ const csp::csp_variable& csp::record::get_record() const
 {
     return variable;
 }
-bool csp::record::compare_record(const csp::csp_variable &variable) const
+bool csp::record::is_same_variable(const csp::csp_variable &variable) const
 {
     return variable==this->variable;
 }

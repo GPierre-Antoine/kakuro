@@ -15,6 +15,8 @@ namespace csp
 {
     class csp_constraint
     {
+    protected:
+        virtual csp::csp_variable * run_fc_child(std::vector<csp::record>& r) const=0;
     public:
         const std::vector<csp::csp_variable*> associated_variables;
 
@@ -23,8 +25,8 @@ namespace csp
 
         csp_variable* get_unvaluated_variable() const;
 
-        void run_fc(std::vector<csp::record>& r) const;
-        virtual void run_fc_child(std::vector<csp::record>& r) const=0;
+        csp::csp_variable * run_fc(std::vector<csp::record>& r) const;
+
 
         explicit csp_constraint(std::vector<csp::csp_variable*> & vector);
         virtual bool run_constraint() const=0;

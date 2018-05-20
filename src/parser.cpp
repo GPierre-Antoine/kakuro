@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <stdexcept>
 #include <fstream>
@@ -15,6 +14,7 @@
 #include "csp/constraint/csp_constraint_sum.h"
 #include "csp/constraint/csp_constraint_difference.h"
 #include "../cpp11_compat.h"
+#include "csp/algo/algorithm_forward_checking.h"
 
 using std::cerr;
 using std::cout;
@@ -229,20 +229,8 @@ void parser::parse(char *nom_fichier)
         }
     }
 
-    auto algo = csp::algorithm_backtrack();
-    auto affectations = algo.run(variables,constraints);
-
-    cout << "Affectations found : " << affectations.size() << endl;
-    auto solution_number = 0u;
-    for (const auto &solution:affectations)
-    {
-
-        std::string text="";
-        for (const auto&value:solution){
-            text+="{" +std::to_string(value) + "}";
-        }
-        cout << "Solution #" << std::setfill('0') <<std::setw(3) << std::to_string(++solution_number) << " : " << text << endl;
-    }
+    run_algorithm(csp::algorithm_backtrack(), variables, constraints);
+    run_algorithm(csp::algorithm_forward_checking(), variables, constraints);
 
 }
 
@@ -287,4 +275,34 @@ void parser::constraint_sum(std::vector<std::size_t> portee, std::size_t arite, 
     }
     constraints.emplace_back(make_unique<csp::csp_constraint_sum>(holder, sum));
     cout << " et de valeur " << sum << endl;
+}
+void parser::run_algorithm(const csp::algorithm &algo,
+                           std::vector<csp::csp_variable> &variables,
+                           const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints)
+{
+    for (auto &i:variables)
+    {
+        i.release_all();
+    }
+    auto affectations = algo.run(variables, constraints);
+    cout << "Running algorithm " + algo.name + "  :" << endl;
+    cout << "Affectations found : " << affectations.size() << endl;
+    auto solution_number = 0u;
+    for (const auto &solution:affectations)
+    {
+
+        std::string text = "";
+        for (const auto &value:solution)
+        {
+            text += "{" + std::to_string(value) + "}";
+        }
+        cout
+            << "Solution #"
+            << std::setfill('0')
+            << std::setw(3)
+            << std::to_string(++solution_number)
+            << " : "
+            << text
+            << endl;
+    }
 }

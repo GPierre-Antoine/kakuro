@@ -15,3 +15,7 @@ void csp::algorithm::record_solution(std::vector<std::vector<std::size_t>> &affe
     }
     affectations.push_back(affectation);
 }
+csp::algorithm::algorithm(std::string name) : name(name)
+{
+
+}

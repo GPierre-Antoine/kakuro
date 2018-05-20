@@ -21,73 +21,103 @@ std::vector<std::vector<size_t>> csp::algorithm_forward_checking::run(std::vecto
 
     while (true)
     {
+        //si pile de variables est vide on sort
         if (it_variable == variables.end())
         {
             break;
         }
 
-        //si variable courante a domaine vide
-        if (!it_variable->get_available_domain_size())
+        if (it_variable->get_available_domain_size())
         {
-            //si variable est la première on arrete BT
+            //si domaine non vide, on assigne la variable.
+            heuristic(*it_variable);
+        }
+        else
+        {
+            //si domaine de variable est vide
+            //si c'est la première variable on sort
             if (it_variable == variables.begin())
             {
                 break;
             }
-            //sinon, on libère le domaine et on retourne à la variable précédente, puis on repart du début de la boucle
-            release_automatic_assignations(it_variable, history);
-            it_variable = std::prev(it_variable, 1);
-            it_variable->restrict_first();
+            //on defait toutes les valuations de cette variable
+            rollback_assignations(*it_variable, history);
+            release_automatic_assignations(history);
+            //on retourne à la dernière variable assignée manuellement
+            while (!history.back().is_same_variable(*it_variable))
+            {
+                it_variable = std::prev(it_variable, 1);
+            }
+            //on exclue sa première valeur et on retourne au début
+            restrict(*it_variable, history);
             continue;
         }
-        //on assigne une valeur à la variable
-        restrict(*it_variable, history, record_type::manual);
 
         //on vérifie toutes les contraintes
-        bool met_error = false;
-        for (const auto &constraint : constraints)
+        //on exclue les valeurs incompatibles
+        //si on a fait une exclusion on recommence
+        bool redo;
+        do
         {
-            if (constraint->associated_variable_are_valuated() && !constraint->run_constraint())
+            redo = false;
+            for (const auto &constraint : constraints)
             {
-                met_error = true;
-                break;
+                if (constraint->one_variable_left_unvaluated())
+                {
+                    constraint->run_fc(history);
+                    if (!redo && constraint->one_variable_left_unvaluated())
+                    {
+                        redo = true;
+                    }
+                }
             }
         }
-        //si il y a eu une erreur, on exclue la valeur courante, et on repart du début de la boucle
-        if (met_error)
+        while (redo);
+
+        for (auto &variable:variables)
         {
-            it_variable->restrict_first();
-            continue;
-        }
-        it_variable = std::next(it_variable, 1);
-        if (it_variable == variables.end())
-        {
-            record_solution(solutions, variables);
-            it_variable = std::prev(it_variable, 1);
-            it_variable->restrict_first();
+            if (!variable.get_available_domain_size())
+            {
+                release_automatic_assignations(history);
+                restrict(variable, history);
+                break;
+            }
         }
     }
 
     return solutions;
 }
 
-void csp::algorithm_forward_checking::restrict(csp::csp_variable &variable,
-                                               std::vector<csp::record> &history,
-                                               record_type type) const
+void csp::algorithm_forward_checking::restrict(csp::csp_variable &variable, std::vector<csp::record> &history) const
 {
+    if (!variable.get_available_domain_size())
+    {
+        return;
+    }
     variable.restrict_first();
-    history.push_back(record(type, variable));
+    history.push_back(record(record_type::manual, variable));
 }
-void csp::algorithm_forward_checking::release_automatic_assignations(typename std::vector<csp::csp_variable>::iterator &it_variable,
-                                                                     std::vector<csp::record> &vector) const
+void csp::algorithm_forward_checking::release_automatic_assignations(std::vector<csp::record> &vector) const
 {
     while (!vector.back().is_manual())
     {
         vector.pop_back();
     }
-    while (!vector.back().compare_record(*it_variable))
-    {
-        std::advance(it_variable, -1);
-    }
 }
 
+void csp::algorithm_forward_checking::rollback_assignations(const csp::csp_variable &variable,
+                                                            std::vector<csp::record> &vector) const
+{
+    while (vector.back().is_manual() && vector.back().is_same_variable(variable))
+    {
+        vector.pop_back();
+    }
+}
+void csp::algorithm_forward_checking::heuristic(csp::csp_variable &variable) const
+{
+    variable.get_first_as_value();
+}
+csp::algorithm_forward_checking::algorithm_forward_checking() : algorithm(std::string("Forward Checking"))
+{
+
+}
