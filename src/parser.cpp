@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <stdexcept>
 #include <fstream>
@@ -39,7 +40,6 @@ void parser::parse(char *nom_fichier)
     CaseGrid grid;
     std::vector<std::size_t> portee;     /* la portee d'une contrainte */
     std::size_t arite;        /* l'arité d'une contrainte */
-    std::size_t i, j;          /* des compteurs de boucle */
 
     filestream.open(nom_fichier, std::ifstream::in);
 
@@ -184,13 +184,13 @@ void parser::parse(char *nom_fichier)
                 if (grid[num_ligne][num_colonne].somme_horizontale != std::numeric_limits<std::size_t>::max())
                 {
                     arite = 0;
-                    i = num_colonne + 1;
+                    std::size_t i = num_colonne + 1;
                     while ((i < nb_colonnes) && (grid[num_ligne][i].is_white()))
                     {
                         portee[arite] = grid[num_ligne][i].num;
                         arite++;
 
-                        j = i + 1;
+                        std::size_t j = i + 1;
                         while ((j < nb_colonnes) && (grid[num_ligne][j].is_white()))
                         {
                             constraint_difference(grid[num_ligne][i].num, grid[num_ligne][j].num);
@@ -205,13 +205,13 @@ void parser::parse(char *nom_fichier)
                 if (grid[num_ligne][num_colonne].somme_verticale != std::numeric_limits<std::size_t>::max())
                 {
                     arite = 0;
-                    i = num_ligne + 1;
+                    std::size_t i = num_ligne + 1;
                     while ((i < nb_lignes) && (grid[i][num_colonne].is_white()))
                     {
                         portee[arite] = grid[i][num_colonne].num;
                         arite++;
 
-                        j = i + 1;
+                        std::size_t j = i + 1;
                         while ((j < nb_lignes) && (grid[j][num_colonne].is_white()))
                         {
                             constraint_difference(grid[i][num_colonne].num, grid[j][num_colonne].num);
@@ -277,10 +277,10 @@ void parser::constraint_sum(std::vector<std::size_t> portee, std::size_t arite, 
     cout << "Contrainte n-aire de somme portant sur";
     std::vector<csp::csp_variable *> holder;
     holder.reserve(arite);
-    for (std::size_t i = 0; i < arite; i++)
+    for (std::size_t index = 0; index < arite; index++)
     {
-        holder.push_back(&variables.at(portee[i]));
-        cout << " " << portee[i];
+        holder.push_back(&variables.at(portee[index]));
+        cout << " " << portee[index];
     }
     constraints.emplace_back(csp::csp_constraint(holder, sum));
     cout << " et de valeur " << sum << endl;

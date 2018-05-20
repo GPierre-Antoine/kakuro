@@ -44,5 +44,5 @@ namespace csp
         void release_all();
     };
 
-    std::ostream& operator<<(std::ostream&f, const csp::csp_variable&var);
+    std::ostream &operator<<(std::ostream &f, const csp::csp_variable &var);
 }
