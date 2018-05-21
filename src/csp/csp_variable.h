@@ -28,6 +28,8 @@ namespace csp
         std::size_t domain_start;
         std::size_t value;
 
+        std::size_t constraint_count;
+
         typename domain_t::iterator get_free_iterator(const std::size_t &index);
     public:
 
@@ -51,6 +53,8 @@ namespace csp
         void release_last();
         void release_all();
         void unvaluate();
+        void increment_constraint_count();
+        std::size_t get_constraint_count();
 
         typename domain_t::const_iterator cbegin() const;
         typename domain_t::const_iterator cend() const;

@@ -84,7 +84,7 @@ void csp::csp_variable::release_all()
 }
 
 csp::csp_variable::csp_variable(const csp::csp_variable &other)
-        : id(other.get_id()), domain_start(other.domain_start), value(other.value)
+        : id(other.get_id()), domain_start(other.domain_start), value(other.value), constraint_count(0)
 {
 
 }
@@ -122,17 +122,11 @@ bool csp::csp_variable::restrict_not(const std::size_t &index, std::vector<csp::
     }
     std::iter_swap(it, std::prev(domain.end(), 1));
 
-    auto size = get_available_size();
-
-    while (size > 1)
+    while (get_available_size() > 1)
     {
         restrict_first();
-        size = get_available_size();
-        std::cout << __LINE__ << std::endl;
-        auto rec = record(record_type::automatic, *this);
-        vector.emplace_back(std::move(rec));
-        auto size2 = get_available_size();
-        assert(size==size2);
+        vector.emplace_back(record(record_type::automatic, *this));
+        get_available_size();
     }
     return true;
 }
@@ -160,4 +154,14 @@ void csp::csp_variable::unvaluate()
 void csp::csp_variable::reset()
 {
     std::sort(domain.begin(), domain.end());
+}
+
+void csp::csp_variable::increment_constraint_count()
+{
+    constraint_count += 1;
+}
+
+std::size_t csp::csp_variable::get_constraint_count()
+{
+    return constraint_count;
 }

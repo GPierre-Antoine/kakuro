@@ -237,17 +237,22 @@ void kakuro_parser::parse(char *nom_fichier)
     { return f->get_id() < s->get_id(); };
 
 
-    run_algorithm(csp::algorithm_backtrack(false), variables, constraints, base);
-    run_algorithm(csp::algorithm_forward_checking(false), variables, constraints, base);
+    run_algorithm(csp::algorithm_backtrack(true), variables, constraints, base);
+    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, base);
 
-    /*
-    auto dom_deg =
-            [&constraints](const csp_variable_ptr &f, const csp_variable_ptr &s)
-    {
-        return f->get_id() > s->get_id();
+
+
+    auto dom_deg = [](const csp_variable_ptr &f){
+        return f->get_available_size()/f->get_constraint_count();
     };
-    run_algorithm(csp::algorithm_forward_checking(false), variables, constraints, dom_deg);
-     */
+
+    auto dom_deg_comp =
+                 [&dom_deg](const csp_variable_ptr &f, const csp_variable_ptr &s)
+                 {
+                     return  dom_deg(f) < dom_deg(s);
+                 };
+
+    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, dom_deg_comp);
 }
 
 /*
@@ -273,7 +278,11 @@ void kakuro_parser::constraint_difference(std::vector<std::shared_ptr<csp::csp_v
                                           std::size_t var1, std::size_t var2)
 {
     cout << "Contrainte binaire de difference entre " << var1 << " et " << var2 << endl;
-    std::vector<std::shared_ptr<csp::csp_variable>> holder{variables.at(var1), variables.at(var2)};
+    auto v1 = variables.at(var1);
+    v1->increment_constraint_count();
+    auto v2 = variables.at(var2);
+    v2->increment_constraint_count();
+    std::vector<std::shared_ptr<csp::csp_variable>> holder{v1, v2};
     constraints.emplace_back(make_unique<csp::csp_constraint_difference>(holder));
 }
 
@@ -285,16 +294,18 @@ void kakuro_parser::constraint_sum(std::vector<std::shared_ptr<csp::csp_variable
                                    std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
                                    std::vector<std::size_t> portee, std::size_t arite, std::size_t sum)
 {
-    cout << "Contrainte n-aire de somme portant sur";
+    std::string                                     text;
     std::vector<std::shared_ptr<csp::csp_variable>> holder;
     holder.reserve(arite);
     for (std::size_t index = 0; index < arite; index++)
     {
-        holder.push_back(variables.at(portee[index]));
-        cout << " " << portee[index];
+        auto var = variables.at(portee[index]);
+        var->increment_constraint_count();
+        holder.push_back(var);
+        text += " " + std::to_string(portee[index]);
     }
     constraints.emplace_back(make_unique<csp::csp_constraint_sum>(holder, sum));
-    cout << " et de valeur " << sum << endl;
+    cout << "Contrainte n-aire de somme portant sur" << text << " et de valeur " << std::to_string(sum) << endl;
 }
 
 void kakuro_parser::run_algorithm(const csp::algorithm &algo,
