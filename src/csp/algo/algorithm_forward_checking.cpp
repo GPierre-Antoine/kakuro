@@ -9,9 +9,18 @@
 #include "../../ostream.h"
 #include "algorithm_forward_checking.h"
 
-std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::vector<std::shared_ptr<csp::csp_variable>> &variables,
-                                                                           const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
-                                                                           const std::function<bool(const csp_variable_ptr&,const csp_variable_ptr&)> & heuristic) const
+
+
+void csp::algorithm_forward_checking::rollback_assignations(const std::shared_ptr<csp::csp_variable> &variable, std::vector<csp::record> &vector) const
+{
+    rollback_assignations((*variable),vector);
+}
+
+std::vector<std::vector<std::size_t>>
+csp::algorithm_forward_checking::run(std::vector<std::shared_ptr<csp::csp_variable>> &variables,
+                                     const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
+                                     const std::function<bool(const csp_variable_ptr &,
+                                                              const csp_variable_ptr &)> &heuristic) const
 {
     for (auto &i:variables)
     {
@@ -21,34 +30,34 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
     auto history = std::vector<record>();
     history.reserve(1000);
 
-    std::size_t index = 0;
+    auto iterator = variables.begin();
     std::vector<std::vector<size_t>> solutions;
 
 
     while (true)
     {
-        cout << __LINE__ << endl;
         //on met la variable la plus interessante devant
-        std::sort(std::next(variables.begin(), index), variables.end(), heuristic);
+        std::sort(iterator, variables.end(), heuristic);
 
         //si la variable courante à un domaine vide
         //on rollback les assignations et on revient à la précédente
         //et on verrouille le resultat courant
         //on recommence
         cout << variables << endl;
-        if (variables[index]->has_empty_domain())
+        if ((*iterator)->has_empty_domain())
         {
-            if (index == 0)
+            if (iterator == variables.begin())
             {
                 break;
             }
-            rollback_assignations(*variables[index], history);
-            restrict(variables[--index], history);
+            rollback_assignations(*iterator, history);
+            std::advance(iterator,-1);
+            restrict(*iterator, history);
             continue;
         }
 
         //la variable considérée prend pour valeur la première valeur possible
-        variables[index]->assign_first_element_as_value();
+        (*iterator)->assign_first_element_as_value();
 
         cout << variables << endl;
 
@@ -70,10 +79,10 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
             }
         }
 
-        bool met_error = false;
-        for (auto left_variables = index; left_variables < variables.size(); left_variables += 1)
+        bool      met_error      = false;
+        for (auto left_variables = iterator; left_variables < variables.end(); std::advance(left_variables,1))
         {
-            if (variables[left_variables]->has_empty_domain())
+            if ((*left_variables)->has_empty_domain())
             {
                 met_error = true;
                 break;
@@ -82,23 +91,25 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
         if (met_error)
         {
             release_automatic_assignations(history);
-            rollback_assignations(*variables[index], history);
-            if (!variables[index]->has_empty_domain())
+            rollback_assignations(**iterator, history);
+            if (!(*iterator)->has_empty_domain())
             {
-                restrict(variables[index], history);
+                restrict(*iterator, history);
             }
             continue;
         }
 
+        std::advance(iterator,1);
 
-        if (++index == variables.size())
+        if (iterator == variables.cend())
         {
             record_solution(solutions, variables);
             if (stop_at_first_result)
             {
                 break;
             }
-            restrict(variables[--index], history);
+            std::advance(iterator,-1);
+            restrict(*iterator, history);
         }
     }
 
@@ -114,9 +125,9 @@ void csp::algorithm_forward_checking::restrict(csp_variable_ptr variable, std::v
     variable->restrict_first();
     history.emplace_back(record(record_type::manual, *variable));
 }
+
 void csp::algorithm_forward_checking::release_automatic_assignations(std::vector<csp::record> &vector) const
 {
-    cout << vector.size();
     while (!vector.back().is_manual())
     {
         vector.pop_back();
@@ -131,9 +142,9 @@ void csp::algorithm_forward_checking::rollback_assignations(const csp::csp_varia
         vector.pop_back();
     }
 }
+
 csp::algorithm_forward_checking::algorithm_forward_checking(bool stop_at_first_result) : algorithm(std::string(
-    "Forward Checking"), stop_at_first_result)
+        "Forward Checking"), stop_at_first_result)
 {
 
 }
-

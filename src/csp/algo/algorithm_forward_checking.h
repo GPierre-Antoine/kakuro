@@ -22,11 +22,12 @@ namespace csp
                                              const std::function<bool(const csp_variable_ptr &,
                                                                       const csp_variable_ptr &)> &heuristic) const override;
 
-        void release_automatic_assignations(std::vector<record> &vector) const;
+        explicit algorithm_forward_checking(bool stop_at_first_result = true);
 
         void rollback_assignations(const csp::csp_variable &variable, std::vector<record> &vector) const;
+        void rollback_assignations(const std::shared_ptr<csp_variable> &variable, std::vector<record> &vector) const;
 
-        explicit algorithm_forward_checking(bool stop_at_first_result = true);
+        void release_automatic_assignations(std::vector<record> &vector) const;
     };
 }
 
