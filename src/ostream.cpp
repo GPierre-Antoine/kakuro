@@ -31,6 +31,11 @@ std::ostream &operator<<(std::ostream &os, const csp::csp_variable &var)
     return os << "}";
 }
 
+std::ostream &operator<<(std::ostream &os, const csp_variable_ptr &var)
+{
+    return os << *var;
+}
+
 std::ostream &operator<<(std::ostream &os, const csp::csp_constraint &constraint)
 {
     os << constraint.edit() << " [";

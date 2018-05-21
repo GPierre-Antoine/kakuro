@@ -20,6 +20,7 @@ namespace csp
 }
 
 std::ostream &operator<<(std::ostream &os, const csp::csp_variable &var);
+std::ostream &operator<<(std::ostream &os, const csp_variable_ptr &var);
 std::ostream &operator<<(std::ostream &os, const csp::algorithm &var);
 std::ostream &operator<<(std::ostream &os, const csp::csp_constraint &constraint);
 std::ostream &operator<<(std::ostream &os, const std::vector<csp_variable_ptr> &constraint);

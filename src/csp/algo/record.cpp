@@ -6,7 +6,7 @@
 #include "record.h"
 #include "../../ostream.h"
 
-csp::record::record(record_type type, csp::csp_variable &variable) : type(type), variable(&variable)
+csp::record::record(record_type type, csp_variable_ptr variable) : type(type), variable(variable)
 {
 
 }
@@ -18,20 +18,20 @@ bool csp::record::is_manual() const
 
 void csp::record::forget()
 {
-    variable->release_last();
+    if (variable)
+    {
+        variable->release_last();
+    }
 }
 
 csp::record::~record()
 {
-    if (variable)
-    {
-        this->forget();
-    }
+    this->forget();
 }
 
-const csp::csp_variable &csp::record::get_record() const
+const csp_variable_ptr csp::record::get_variable() const
 {
-    return *variable;
+    return variable;
 }
 
 bool csp::record::is_same_variable(const csp::csp_variable &other) const
@@ -39,7 +39,11 @@ bool csp::record::is_same_variable(const csp::csp_variable &other) const
     return *variable == other;
 }
 
-csp::record::record(csp::record && other) noexcept
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+csp::record::record(csp::record &&other)  noexcept // NOLINT
 {
     swap(*this, other);
 }
+#pragma clang diagnostic pop
+

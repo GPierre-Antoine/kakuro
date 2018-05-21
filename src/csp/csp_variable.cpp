@@ -34,7 +34,15 @@ std::size_t csp::csp_variable::get_value() const
 
 bool csp::csp_variable::is_valuated() const
 {
-    return domain_start <= value && value < domain.size();
+
+    auto i1 = domain_start;
+    auto i2 = value;
+    auto i3 = domain.size();
+    auto i4 = i1<=i2;
+    auto i5 = i2<i3;
+    auto i6 = i4 && i5;
+
+    return i6;
 }
 
 void csp::csp_variable::restrict_first()
@@ -49,7 +57,7 @@ void csp::csp_variable::restrict_first()
 
 void csp::csp_variable::release_last()
 {
-    if (!domain_start)
+    if (domain_start == 0)
     {
         return;
     }
@@ -80,23 +88,23 @@ void csp::csp_variable::assign_first_element_as_value()
 void csp::csp_variable::release_all()
 {
     domain_start = 0;
-    value        = 9;
+    value = 9;
 }
 
 csp::csp_variable::csp_variable(const csp::csp_variable &other)
-        : id(other.get_id()), domain_start(other.domain_start), value(other.value), constraint_count(0)
+    : id(other.get_id()), domain_start(other.domain_start), value(other.value), constraint_count(0)
 {
 
 }
 
-bool csp::csp_variable::restrict(const std::size_t &index, std::vector<record> &vector)
+void csp::csp_variable::restrict(const std::size_t &index)
 {
 
     auto it = get_free_iterator(index);
     if (it == domain.end())
     {
         //value is locked
-        return false;
+        return;
     }
     auto d = std::next(domain.begin(), domain_start);
     if (it != d)
@@ -104,31 +112,26 @@ bool csp::csp_variable::restrict(const std::size_t &index, std::vector<record> &
         std::iter_swap(it, d);
     }
     restrict_first();
-    vector.emplace_back(record(record_type::automatic, *this));
-    return true;
 }
 
-bool csp::csp_variable::restrict_not(const std::size_t &index, std::vector<csp::record> &vector)
+void csp::csp_variable::restrict_not(const std::size_t &index)
 {
     auto it = get_free_iterator(index);
+    auto correction = 1;
     if (it == domain.end())
     {
-        while (!has_empty_domain())
-        {
-            restrict_first();
-            vector.emplace_back(record(record_type::automatic, *this));
-        }
-        return false;
+        correction = 0;
     }
-    std::iter_swap(it, std::prev(domain.end(), 1));
+    else
+    {
+        std::iter_swap(it, std::prev(domain.end(), 1));
+    }
 
-    while (get_available_size() > 1)
+    while (get_available_size() - correction)
     {
         restrict_first();
-        vector.emplace_back(record(record_type::automatic, *this));
-        get_available_size();
     }
-    return true;
+
 }
 
 bool csp::csp_variable::has_empty_domain() const
@@ -161,7 +164,8 @@ void csp::csp_variable::increment_constraint_count()
     constraint_count += 1;
 }
 
-std::size_t csp::csp_variable::get_constraint_count()
+std::size_t csp::csp_variable::get_constraint_count() const
 {
     return constraint_count;
 }
+

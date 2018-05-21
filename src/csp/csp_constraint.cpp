@@ -17,7 +17,7 @@ bool csp::csp_constraint::is_valuated() const
     return true;
 }
 
-csp::csp_constraint::csp_constraint(std::vector<std::shared_ptr<csp::csp_variable>> &vector) : associated_variables(
+csp::csp_constraint::csp_constraint(std::vector<csp_variable_ptr> &vector) : associated_variables(
     vector)
 {
 
@@ -36,7 +36,7 @@ bool csp::csp_constraint::has_only_one_variable_unvaluated_left() const
     return counter == 1;
 }
 
-std::shared_ptr<csp::csp_variable> csp::csp_constraint::get_last_unvaluated_variable() const
+csp_variable_ptr csp::csp_constraint::get_last_unvaluated_variable() const
 {
     if (!has_only_one_variable_unvaluated_left())
     {
@@ -52,23 +52,23 @@ std::shared_ptr<csp::csp_variable> csp::csp_constraint::get_last_unvaluated_vari
     // impossible
     return nullptr;
 }
-std::shared_ptr<csp::csp_variable> csp::csp_constraint::run_fc(std::vector<csp::record> &r) const
+csp_variable_ptr csp::csp_constraint::run_fc() const
 {
     if (!has_only_one_variable_unvaluated_left())
     {
         throw std::runtime_error("More than one variable left");
     }
-    return run_fc_child(r);
+    return run_fc_child();
 }
 bool csp::csp_constraint::is_satisfied() const
 {
     return run_constraint();
 }
-std::vector<std::shared_ptr<csp::csp_variable>>::const_iterator csp::csp_constraint::cbegin() const
+std::vector<csp_variable_ptr>::const_iterator csp::csp_constraint::cbegin() const
 {
     return associated_variables.cbegin();
 }
-std::vector<std::shared_ptr<csp::csp_variable>>::const_iterator csp::csp_constraint::cend() const
+std::vector<csp_variable_ptr>::const_iterator csp::csp_constraint::cend() const
 {
     return associated_variables.cend();
 }

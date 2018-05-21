@@ -11,9 +11,9 @@
 #include <utility>
 #include <memory>
 
+#include "../forward.h"
 
 typedef std::vector<std::size_t> domain_t;
-
 namespace csp
 {
     class record;
@@ -46,15 +46,15 @@ namespace csp
         std::size_t get_available_size() const;
         bool has_empty_domain() const;
 
-        bool restrict(const std::size_t &index, std::vector<record>&vector);
-        bool restrict_not(const std::size_t &index, std::vector<record>&vector);
+        void restrict(const std::size_t &index);
+        void restrict_not(const std::size_t &index);
 
         void restrict_first();
         void release_last();
         void release_all();
         void unvaluate();
         void increment_constraint_count();
-        std::size_t get_constraint_count();
+        std::size_t get_constraint_count() const;
 
         typename domain_t::const_iterator cbegin() const;
         typename domain_t::const_iterator cend() const;

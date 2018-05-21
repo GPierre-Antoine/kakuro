@@ -3,7 +3,7 @@
 //
 
 #include "csp_constraint_difference.h"
-csp::csp_constraint_difference::csp_constraint_difference(std::vector<std::shared_ptr<csp::csp_variable>> &vector) :
+csp::csp_constraint_difference::csp_constraint_difference(std::vector<csp_variable_ptr> &vector) :
     csp_constraint(vector)
 {
     if (associated_variables.size()!=2){
@@ -15,12 +15,12 @@ bool csp::csp_constraint_difference::run_constraint() const
     return associated_variables[0]->get_value() != associated_variables[1]->get_value();
 }
 
-std::shared_ptr<csp::csp_variable> csp::csp_constraint_difference::run_fc_child(std::vector<csp::record> &history) const
+csp_variable_ptr csp::csp_constraint_difference::run_fc_child() const
 {
     auto free = get_last_unvaluated_variable();
     for (auto i:associated_variables){
         if (i->is_valuated()){
-            free->restrict(i->get_value(),history);
+            free->restrict(i->get_value());
         }
     }
     return free;

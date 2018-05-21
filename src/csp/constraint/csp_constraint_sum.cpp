@@ -6,8 +6,8 @@
 
 #include "csp_constraint_sum.h"
 
-csp::csp_constraint_sum::csp_constraint_sum(std::vector<std::shared_ptr<csp::csp_variable>> &vector, std::size_t sum)
-    : csp_constraint(vector), sum(sum)
+csp::csp_constraint_sum::csp_constraint_sum(std::vector<csp_variable_ptr> & variables, std::size_t sum)
+    : csp_constraint(variables), sum(sum)
 {
 
 }
@@ -21,7 +21,7 @@ bool csp::csp_constraint_sum::run_constraint() const
     }
     return sum == accumulation;
 }
-std::shared_ptr<csp::csp_variable> csp::csp_constraint_sum::run_fc_child(std::vector<csp::record> &history) const
+csp_variable_ptr csp::csp_constraint_sum::run_fc_child() const
 {
     auto free = get_last_unvaluated_variable();
     std::size_t partial_sum = 0u;
@@ -33,9 +33,10 @@ std::shared_ptr<csp::csp_variable> csp::csp_constraint_sum::run_fc_child(std::ve
         }
     }
     std::size_t expected_value = static_cast<std::size_t >(std::max(static_cast<long>(sum - partial_sum), 0l));
-    free->restrict_not(expected_value, history);
+    free->restrict_not(expected_value);
     return free;
 }
+
 std::string csp::csp_constraint_sum::edit() const
 {
     auto text= "Sum Constraint ("
