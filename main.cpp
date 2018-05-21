@@ -6,7 +6,7 @@ using std::cerr;
 using std::endl;
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
+    if (argc < 2) {
         cerr << "Utilisation: " << argv[0] << " fichier" << endl;
         exit(EXIT_FAILURE);
     }
@@ -14,7 +14,9 @@ int main(int argc, char *argv[]) {
     kakuro_parser p{};
 
     try {
-        p.parse(argv[1]);
+        for (auto it = argv + 1; it < (argv + argc); ++it) {
+            p.parse(*it);
+        }
     }
     catch (std::runtime_error &error) {
         cerr << error.what() << endl;
