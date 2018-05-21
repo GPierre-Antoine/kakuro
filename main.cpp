@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "src/parser.h"
+#include "src/kakuro_parser.h"
 
 using std::cerr;
 using std::endl;
@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    parser p{};
+    kakuro_parser p{};
 
     try {
         p.parse(argv[1]);

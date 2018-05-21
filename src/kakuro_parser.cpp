@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <ctime>
 
-#include "parser.h"
+#include "kakuro_parser.h"
 #include "Couleur.h"
 #include "Case.h"
 #include "csp/algo/algorithm_backtrack.h"
@@ -24,7 +24,7 @@ using std::endl;
 typedef std::vector<Case> CaseLine;
 typedef std::vector<CaseLine> CaseGrid;
 
-void parser::parse(char *nom_fichier)
+void kakuro_parser::parse(char *nom_fichier)
 {
     std::ifstream filestream;
 
@@ -83,11 +83,11 @@ void parser::parse(char *nom_fichier)
 
     }
 
-    assert(grid.size() != 0);
+    assert(!grid.empty());
 
     for (const auto &line : grid)
     {
-        assert(line.size() != 0);
+        assert(!line.empty());
     }
 
     filestream.clear();
@@ -96,6 +96,9 @@ void parser::parse(char *nom_fichier)
     num_ligne = 0;
     num_colonne = 0;
     nb_variables = 0;
+
+    std::vector<std::shared_ptr<csp::csp_variable>> variables;
+    std::vector<std::unique_ptr<csp::csp_constraint>> constraints;
 
     filestream.get(c);
 
@@ -114,7 +117,7 @@ void parser::parse(char *nom_fichier)
         {
             grid[num_ligne][num_colonne].coul = BLANCHE;
             grid[num_ligne][num_colonne].num = nb_variables;
-            make_variable(nb_variables);
+            make_variable(variables,nb_variables);
             nb_variables++;
         }
         else if (c == '\\')    /* case noire de la forme \y ou \ */
@@ -193,13 +196,13 @@ void parser::parse(char *nom_fichier)
                         std::size_t j = i + 1;
                         while ((j < nb_colonnes) && (grid[num_ligne][j].is_white()))
                         {
-                            constraint_difference(grid[num_ligne][i].num, grid[num_ligne][j].num);
+                            constraint_difference(variables, constraints, grid[num_ligne][i].num, grid[num_ligne][j].num);
                             j++;
                         }
                         i++;
                     }
 
-                    constraint_sum(portee, arite, grid[num_ligne][num_colonne].somme_horizontale);
+                    constraint_sum(variables, constraints, portee, arite, grid[num_ligne][num_colonne].somme_horizontale);
                 }
 
                 if (grid[num_ligne][num_colonne].somme_verticale != std::numeric_limits<std::size_t>::max())
@@ -214,13 +217,13 @@ void parser::parse(char *nom_fichier)
                         std::size_t j = i + 1;
                         while ((j < nb_lignes) && (grid[j][num_colonne].is_white()))
                         {
-                            constraint_difference(grid[i][num_colonne].num, grid[j][num_colonne].num);
+                            constraint_difference(variables, constraints,grid[i][num_colonne].num, grid[j][num_colonne].num);
                             j++;
                         }
                         i++;
                     }
 
-                    constraint_sum(portee, arite, grid[num_ligne][num_colonne].somme_verticale);
+                    constraint_sum(variables, constraints, portee, arite, grid[num_ligne][num_colonne].somme_verticale);
                 }
             }
         }
@@ -248,7 +251,7 @@ void parser::parse(char *nom_fichier)
 /**
  * fonction permettant la création d'une nouvelle variable ayant pour numéro num
  */
-void parser::make_variable(std::size_t num)
+void kakuro_parser::make_variable(std::vector<std::shared_ptr<csp::csp_variable>>&variables,std::size_t num)
 {
     cout << "Variable " << num << endl;
     variables.emplace_back(std::make_shared<csp::csp_variable>(num));
@@ -258,7 +261,7 @@ void parser::make_variable(std::size_t num)
  * fonction permettant la création d'une nouvelle contrainte binaire de différence entre les variables var1 et var2
  */
 
-void parser::constraint_difference(std::size_t var1, std::size_t var2)
+void kakuro_parser::constraint_difference(std::vector<std::shared_ptr<csp::csp_variable>>&variables, std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,std::size_t var1, std::size_t var2)
 {
     cout << "Contrainte binaire de difference entre " << var1 << " et " << var2 << endl;
     std::vector<std::shared_ptr<csp::csp_variable>> holder{variables.at(var1), variables.at(var2)};
@@ -269,7 +272,7 @@ void parser::constraint_difference(std::size_t var1, std::size_t var2)
  * fonction permettant la création d'une nouvelle contrainte n-aire de somme portant sur les variables contenant
  * dans le tableau portee de taille arite et dont la valeur est val
  */
-void parser::constraint_sum(std::vector<std::size_t> portee, std::size_t arite, std::size_t sum)
+void kakuro_parser::constraint_sum(std::vector<std::shared_ptr<csp::csp_variable>>&variables, std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,std::vector<std::size_t> portee, std::size_t arite, std::size_t sum)
 {
     cout << "Contrainte n-aire de somme portant sur";
     std::vector<std::shared_ptr<csp::csp_variable>> holder;
@@ -282,7 +285,7 @@ void parser::constraint_sum(std::vector<std::size_t> portee, std::size_t arite, 
     constraints.emplace_back(make_unique<csp::csp_constraint_sum>(holder, sum));
     cout << " et de valeur " << sum << endl;
 }
-void parser::run_algorithm(const csp::algorithm &algo,
+void kakuro_parser::run_algorithm(const csp::algorithm &algo,
                            std::vector<csp_variable_ptr> &variables,
                            const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
                            const heuristic &heuristic)
@@ -307,7 +310,7 @@ void parser::run_algorithm(const csp::algorithm &algo,
     for (const auto &solution:affectations)
     {
 
-        std::string text = "";
+        std::string text;
         for (const auto &value:solution)
         {
             text += "{" + std::to_string(value) + "}";
