@@ -4,11 +4,6 @@
 
 #include <algorithm>
 
-#include <iostream>
-using std::cout;
-using std::endl;
-
-
 #include "csp_constraint_sum.h"
 
 csp::csp_constraint_sum::csp_constraint_sum(std::vector<std::shared_ptr<csp::csp_variable>> &vector, std::size_t sum)

@@ -9,5 +9,4 @@ enum class record_type
 {
     manual, automatic
 };
-
 #endif //KAKURO_RECORD_TYPE_H
