@@ -3,102 +3,120 @@
 //
 
 
+#include <algorithm>
+#include <cstddef>
+
+#include "../../ostream.h"
 #include "algorithm_forward_checking.h"
 
-std::vector<std::vector<size_t>> csp::algorithm_forward_checking::run(std::vector<csp::csp_variable> &variables,
-                                                                      const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints) const
+std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::vector<std::shared_ptr<csp::csp_variable>> &variables,
+                                                                           const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
+                                                                           const std::function<bool(const csp_variable_ptr&,const csp_variable_ptr&)> & heuristic) const
 {
     for (auto &i:variables)
     {
-        i.release_all();
+        i->release_all();
     }
 
     auto history = std::vector<record>();
     history.reserve(1000);
 
-    auto it_variable = variables.begin();
+    std::size_t index = 0;
     std::vector<std::vector<size_t>> solutions;
+
 
     while (true)
     {
-        //si pile de variables est vide on sort
-        if (it_variable == variables.end())
-        {
-            break;
-        }
+        cout << __LINE__ << endl;
+        //on met la variable la plus interessante devant
+        std::sort(std::next(variables.begin(), index), variables.end(), heuristic);
 
-        if (it_variable->get_available_domain_size())
+        //si la variable courante à un domaine vide
+        //on rollback les assignations et on revient à la précédente
+        //et on verrouille le resultat courant
+        //on recommence
+        cout << variables << endl;
+        if (variables[index]->has_empty_domain())
         {
-            //si domaine non vide, on assigne la variable.
-            heuristic(*it_variable);
-        }
-        else
-        {
-            //si domaine de variable est vide
-            //si c'est la première variable on sort
-            if (it_variable == variables.begin())
+            if (index == 0)
             {
                 break;
             }
-            //on defait toutes les valuations de cette variable
-            rollback_assignations(*it_variable, history);
-            release_automatic_assignations(history);
-            //on retourne à la dernière variable assignée manuellement
-            while (!history.back().is_same_variable(*it_variable))
-            {
-                it_variable = std::prev(it_variable, 1);
-            }
-            //on exclue sa première valeur et on retourne au début
-            restrict(*it_variable, history);
+            rollback_assignations(*variables[index], history);
+            restrict(variables[--index], history);
             continue;
         }
 
-        //on vérifie toutes les contraintes
-        //on exclue les valeurs incompatibles
-        //si on a fait une exclusion on recommence
-        bool redo;
-        do
+        //la variable considérée prend pour valeur la première valeur possible
+        variables[index]->assign_first_element_as_value();
+
+        cout << variables << endl;
+
+        //on verifie toutes les constantes
+        for (const auto &constraint:constraints)
         {
-            redo = false;
-            for (const auto &constraint : constraints)
+            if (constraint->has_only_one_variable_unvaluated_left())
             {
-                if (constraint->one_variable_left_unvaluated())
+                //si une
+                auto var = constraint->get_last_unvaluated_variable();
+                if (var->get_available_size() > 1)
                 {
                     constraint->run_fc(history);
-                    if (!redo && constraint->one_variable_left_unvaluated())
+                    if (var->has_empty_domain())
                     {
-                        redo = true;
+                        break;
                     }
                 }
             }
         }
-        while (redo);
 
-        for (auto &variable:variables)
+        bool met_error = false;
+        for (auto left_variables = index; left_variables < variables.size(); left_variables += 1)
         {
-            if (!variable.get_available_domain_size())
+            if (variables[left_variables]->has_empty_domain())
             {
-                release_automatic_assignations(history);
-                restrict(variable, history);
+                met_error = true;
                 break;
             }
+        }
+        if (met_error)
+        {
+            release_automatic_assignations(history);
+            rollback_assignations(*variables[index], history);
+            if (!variables[index]->has_empty_domain())
+            {
+                restrict(variables[index], history);
+            }
+            continue;
+        }
+
+
+        if (++index == variables.size())
+        {
+            record_solution(solutions, variables);
+            if (stop_at_first_result)
+            {
+                break;
+            }
+            restrict(variables[--index], history);
         }
     }
 
     return solutions;
 }
 
-void csp::algorithm_forward_checking::restrict(csp::csp_variable &variable, std::vector<csp::record> &history) const
+void csp::algorithm_forward_checking::restrict(csp_variable_ptr variable, std::vector<csp::record> &history) const
 {
-    if (!variable.get_available_domain_size())
+    if (!variable->get_available_size())
     {
         return;
     }
-    variable.restrict_first();
-    history.push_back(record(record_type::manual, variable));
+    variable->restrict_first();
+    history.emplace_back(record(record_type::manual, *variable));
 }
 void csp::algorithm_forward_checking::release_automatic_assignations(std::vector<csp::record> &vector) const
 {
+    cout << vector.size();
     while (!vector.back().is_manual())
     {
         vector.pop_back();
@@ -113,11 +131,9 @@ void csp::algorithm_forward_checking::rollback_assignations(const csp::csp_varia
         vector.pop_back();
     }
 }
-void csp::algorithm_forward_checking::heuristic(csp::csp_variable &variable) const
-{
-    variable.get_first_as_value();
-}
-csp::algorithm_forward_checking::algorithm_forward_checking() : algorithm(std::string("Forward Checking"))
+csp::algorithm_forward_checking::algorithm_forward_checking(bool stop_at_first_result) : algorithm(std::string(
+    "Forward Checking"), stop_at_first_result)
 {
 
 }
+

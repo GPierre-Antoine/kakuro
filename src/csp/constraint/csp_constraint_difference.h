@@ -13,9 +13,10 @@ namespace csp
         : public csp_constraint
     {
     protected:
-        csp::csp_variable * run_fc_child(std::vector<record>&history) const override;
+        std::shared_ptr<csp::csp_variable> run_fc_child(std::vector<record>&history) const override;
     public:
-        explicit csp_constraint_difference(std::vector<csp_variable *> &vector);
+        explicit csp_constraint_difference(std::vector<std::shared_ptr<csp::csp_variable>> &vector);
+        std::string edit() const override;
         bool run_constraint() const override;
     };
 }

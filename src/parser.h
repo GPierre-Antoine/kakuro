@@ -10,11 +10,10 @@
 #include "csp/csp_constraint.h"
 #include "csp/algorithm.h"
 
-
 class parser
 {
 private:
-    std::vector<csp::csp_variable> variables;
+    std::vector<std::shared_ptr<csp::csp_variable>> variables;
     std::vector<std::unique_ptr<csp::csp_constraint>> constraints;
 public:
     void parse(char *nom_fichier);
@@ -40,7 +39,10 @@ public:
      */
     void constraint_sum(std::vector<std::size_t> portee, std::size_t arite, std::size_t sum);
 
-    void run_algorithm(const csp::algorithm & algo,std::vector<csp::csp_variable> & variables, const std::vector<std::unique_ptr<csp::csp_constraint>>&constraints);
+    void run_algorithm(const csp::algorithm &algo,
+                       std::vector<std::shared_ptr<csp::csp_variable>> &variables,
+                       const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
+                       const heuristic &heuristic);
 
     parser() = default;
 };

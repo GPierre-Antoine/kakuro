@@ -4,30 +4,50 @@
 
 #include "ostream.h"
 
-std::ostream &csp::operator<<(std::ostream &os, const csp::csp_variable &var)
+#include "csp/csp_variable.h"
+#include "csp/csp_constraint.h"
+#include "csp/algorithm.h"
+
+std::ostream &operator<<(std::ostream &os, const csp::algorithm &var)
 {
-    return os
-        << std::string("variable n°")
+    return os << var.name;
+}
+
+std::ostream &operator<<(std::ostream &os, const csp::csp_variable &var)
+{
+    os
+        << std::string("V")
             + std::to_string(var.get_id())
-            + " "
-            + (var.is_valuated() ? "{" + std::to_string(var.get_value()) + "}" : " {}");
-}
-
-std::ostream &csp::operator<<(std::ostream &os, const csp::csp_constraint_sum &constraint)
-{
-
-    os << "Sum Constraint (" + std::to_string(constraint.sum) + ") ";
-    for (const auto &i:constraint.associated_variables)
+            + (var.is_valuated() ? "(" + std::to_string(var.get_value()) + ")" : "");
+    os << "{";
+    for (auto i = var.cbegin(); i < var.cend(); std::advance(i, 1))
     {
-        os << *i << " ";
+        if (i!=var.cbegin())
+        {
+            os << ",";
+        }
+        os << *i;
     }
-    return os;
+    return os << "}";
 }
-std::ostream &csp::operator<<(std::ostream &os, const csp::csp_constraint_difference &constraint)
+
+std::ostream &operator<<(std::ostream &os, const csp::csp_constraint &constraint)
 {
-    os << "Diff Constraint ";
-    for (const auto &i:constraint.associated_variables)
+    os << constraint.edit() << " [";
+    for (auto i = constraint.cbegin(); i < constraint.cend(); std::advance(i, 1))
     {
+        if (i!=constraint.cbegin())
+        {
+            os << ",";
+        }
+        os << **i;
+    }
+    return os << "]";
+}
+
+std::ostream &operator<<(std::ostream &os, const std::vector<csp_variable_ptr> &constraint)
+{
+    for (const auto&i:constraint){
         os << *i << " ";
     }
     return os;

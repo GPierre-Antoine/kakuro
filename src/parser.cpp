@@ -6,6 +6,7 @@
 #include <cassert>
 #include <algorithm>
 #include <iomanip>
+#include <ctime>
 
 #include "parser.h"
 #include "Couleur.h"
@@ -22,11 +23,6 @@ using std::endl;
 
 typedef std::vector<Case> CaseLine;
 typedef std::vector<CaseLine> CaseGrid;
-
-bool csp_variable_sort(const csp::csp_variable &v1, const csp::csp_variable &v2)
-{
-    return v1.get_id() < v2.get_id();
-}
 
 void parser::parse(char *nom_fichier)
 {
@@ -164,7 +160,8 @@ void parser::parse(char *nom_fichier)
     filestream.close();
 
     cout << "Nombre de variables trouvées : " << nb_variables << endl;
-    std::sort(variables.begin(), variables.end(), csp_variable_sort);
+    std::sort(variables.begin(), variables.end(), [](const csp_variable_ptr &f, const csp_variable_ptr &s)
+    { return f->get_id() < s->get_id(); });
     constraints.reserve(3 * nb_variables);
 
     /* on crée les contraintes */
@@ -229,8 +226,17 @@ void parser::parse(char *nom_fichier)
         }
     }
 
-    run_algorithm(csp::algorithm_backtrack(), variables, constraints);
-    run_algorithm(csp::algorithm_forward_checking(), variables, constraints);
+    auto base = [](const csp_variable_ptr &f, const csp_variable_ptr &s)
+    { return f->get_id() < s->get_id(); };
+
+    auto &constraints_cp=constraints;
+
+    auto dom_deg = [&constraints_cp](const csp_variable_ptr &f, const csp_variable_ptr &s)
+    { return f->get_id() > s->get_id(); };
+
+    run_algorithm(csp::algorithm_backtrack(false), variables, constraints, base);
+    run_algorithm(csp::algorithm_forward_checking(false), variables, constraints, base);
+    run_algorithm(csp::algorithm_forward_checking(false), variables, constraints, dom_deg);
 
 }
 
@@ -245,7 +251,7 @@ void parser::parse(char *nom_fichier)
 void parser::make_variable(std::size_t num)
 {
     cout << "Variable " << num << endl;
-    variables.emplace_back(csp::csp_variable(num));
+    variables.emplace_back(std::make_shared<csp::csp_variable>(num));
 }
 
 /**
@@ -255,7 +261,7 @@ void parser::make_variable(std::size_t num)
 void parser::constraint_difference(std::size_t var1, std::size_t var2)
 {
     cout << "Contrainte binaire de difference entre " << var1 << " et " << var2 << endl;
-    std::vector<csp::csp_variable *> holder{&variables.at(var1), &variables.at(var2)};
+    std::vector<std::shared_ptr<csp::csp_variable>> holder{variables.at(var1), variables.at(var2)};
     constraints.emplace_back(make_unique<csp::csp_constraint_difference>(holder));
 }
 
@@ -266,26 +272,36 @@ void parser::constraint_difference(std::size_t var1, std::size_t var2)
 void parser::constraint_sum(std::vector<std::size_t> portee, std::size_t arite, std::size_t sum)
 {
     cout << "Contrainte n-aire de somme portant sur";
-    std::vector<csp::csp_variable *> holder;
+    std::vector<std::shared_ptr<csp::csp_variable>> holder;
     holder.reserve(arite);
     for (std::size_t index = 0; index < arite; index++)
     {
-        holder.push_back(&variables.at(portee[index]));
+        holder.push_back(variables.at(portee[index]));
         cout << " " << portee[index];
     }
     constraints.emplace_back(make_unique<csp::csp_constraint_sum>(holder, sum));
     cout << " et de valeur " << sum << endl;
 }
 void parser::run_algorithm(const csp::algorithm &algo,
-                           std::vector<csp::csp_variable> &variables,
-                           const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints)
+                           std::vector<csp_variable_ptr> &variables,
+                           const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
+                           const heuristic &heuristic)
 {
     for (auto &i:variables)
     {
-        i.release_all();
+        i->release_all();
+        i->reset();
     }
-    auto affectations = algo.run(variables, constraints);
-    cout << "Running algorithm " + algo.name + "  :" << endl;
+
+    std::sort(variables.begin(), variables.end(),heuristic);
+
+    std::clock_t begin = std::clock();
+    auto affectations = algo.run(variables, constraints, heuristic);
+    std::clock_t end = std::clock();
+
+    auto elasped_clock = (static_cast<std::size_t >(end - begin));
+
+    cout << "Ran algorithm " + algo.name + " in " << elasped_clock << " clocks" << endl;
     cout << "Affectations found : " << affectations.size() << endl;
     auto solution_number = 0u;
     for (const auto &solution:affectations)

@@ -4,7 +4,9 @@
 
 
 #include "record.h"
-csp::record::record(record_type type, csp::csp_variable &variable) : type(type), variable(variable)
+#include "../../ostream.h"
+
+csp::record::record(record_type type, csp::csp_variable & variable) : type(type), variable(&variable)
 {
 
 }
@@ -14,17 +16,17 @@ bool csp::record::is_manual() const
 }
 void csp::record::forget()
 {
-    variable.release_last();
+    variable->release_last();
 }
 csp::record::~record()
 {
     this->forget();
 }
-const csp::csp_variable& csp::record::get_record() const
+const csp::csp_variable & csp::record::get_record() const
 {
-    return variable;
+    return *variable;
 }
-bool csp::record::is_same_variable(const csp::csp_variable &variable) const
+bool csp::record::is_same_variable(const csp::csp_variable &other) const
 {
-    return variable==this->variable;
+    return *variable == other;
 }

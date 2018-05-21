@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <memory>
 
 
 typedef std::vector<std::size_t> domain_t;
@@ -24,23 +25,24 @@ namespace csp
 
         domain_t domain{1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-        typename domain_t::const_iterator value{nullptr};
-        typename domain_t::iterator domain_start;
+        std::size_t domain_start;
+        std::size_t value;
 
         typename domain_t::iterator get_free_iterator(const std::size_t &index);
-        typename domain_t::iterator get_locked_iterator(const std::size_t &index);
     public:
+
+        void reset();
         explicit csp_variable(const std::size_t &s);
         csp_variable(const csp_variable &other);
 
         std::size_t get_id() const;
 
-        void set_value(const std::size_t &index);
-        void get_first_as_value();
-        std::size_t get_value() const;
+        void assign_first_element_as_value();
         bool is_valuated() const;
+        std::size_t get_value() const;
 
-        std::size_t get_available_domain_size() const;
+        std::size_t get_available_size() const;
+        bool has_empty_domain() const;
 
         bool restrict(const std::size_t &index, std::vector<record>&vector);
         bool restrict_not(const std::size_t &index, std::vector<record>&vector);
@@ -48,6 +50,10 @@ namespace csp
         void restrict_first();
         void release_last();
         void release_all();
+        void unvaluate();
+
+        typename domain_t::const_iterator cbegin() const;
+        typename domain_t::const_iterator cend() const;
     };
 }
 
