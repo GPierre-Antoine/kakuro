@@ -8,11 +8,7 @@ set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_FLAGS "-g3 -W -Wall -Wextra --pedantic -Wno-comment -Werror -Wno-unused-but-set-variable -Wno-unused-parameter")
-
-if (CMAKE_BUILD_TYPE MATCHES "Debug")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-endif (CMAKE_BUILD_TYPE MATCHES "Debug")
+set(CMAKE_CXX_FLAGS "-g3 -W -Wall -Wextra --pedantic -Wno-comment -Werror -Wno-unused-but-set-variable -Wno-unused-parameter -g")
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Module")

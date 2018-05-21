@@ -16,6 +16,7 @@ bool csp::record::is_manual() const
 }
 void csp::record::forget()
 {
+    std::cout << __LINE__ << std::endl;
     variable->release_last();
 }
 csp::record::~record()
