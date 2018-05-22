@@ -27,7 +27,7 @@ std::size_t csp::csp_variable::get_value() const
 {
     if (!is_valuated())
     {
-        throw std::runtime_error("Empty Domain for variable " + std::to_string(get_id()));
+        throw std::runtime_error("Empty Domain for variable " + std::to_string(get_id()) + " ");
     }
     return domain[value];
 }
@@ -116,6 +116,7 @@ void csp::csp_variable::restrict(const std::size_t &index)
 
 void csp::csp_variable::restrict_not(const std::size_t &index)
 {
+    unvaluate();
     auto it = get_free_iterator(index);
     auto correction = 1;
     if (it == domain.end())

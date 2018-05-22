@@ -4,6 +4,7 @@
 
 
 #include "algorithm.h"
+#include "../ostream.h"
 
 void csp::algorithm::record_solution(std::vector<std::vector<std::size_t>> &affectations,
                                      const std::vector<csp_variable_ptr> &variables) const

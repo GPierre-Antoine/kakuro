@@ -21,6 +21,8 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
                                                                            const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
                                                                            heuristic heuristic) const
 {
+
+
     for (auto &i:variables)
     {
         i->release_all();
@@ -32,11 +34,13 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
     auto iterator = variables.begin();
     std::vector<std::vector<size_t>> solutions;
 
+    std::size_t counter = 0;
 
     while (true)
     {
-        //on met la variable la plus interessante devant
-        std::sort(iterator, variables.end(), heuristic);
+        cout << "Iteration : " << ++counter << ", current : " << *iterator << endl;
+        bool met_error = false;
+
 
         //si la variable courante à un domaine vide
         //on rollback les assignations et on revient à la précédente
@@ -49,67 +53,32 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
             {
                 break;
             }
-            std::advance(iterator, -1);
+            cout << variables << endl;
             rollback_assignations(*iterator, history);
+            cout << variables << endl;
+            if ((*iterator)->has_empty_domain())
+            {
+                std::advance(iterator, -1);
+            }
             restrict(*iterator, history);
             continue;
         }
+
+        //on met la variable la plus interessante devant
+        std::sort(iterator, variables.end(), heuristic);
 
         //la variable considérée prend pour valeur la première valeur possible
         (*iterator)->assign_first_element_as_value();
         cout << variables << endl;
 
         //on verifie toutes les constantes
+
         for (const auto &constraint:constraints)
         {
             if (constraint->has_only_one_variable_unvaluated_left())
             {
-                //si une
-                auto variable_ptr = constraint->get_last_unvaluated_variable();
-                auto domain_size_before_filter = variable_ptr->get_available_size();
-                if (domain_size_before_filter > 1)
-                {
-                    constraint->run_fc();
-                    long size_diff = domain_size_before_filter - variable_ptr->get_available_size();
-                    while (size_diff>0)
-                    {
-                        history.emplace_back(record(record_type::automatic, variable_ptr));
-                        size_diff-=1;
-                    }
-                    if (variable_ptr->has_empty_domain())
-                    {
-                        break;
-                    }
-                }
+                constraint->run_fc();
             }
-        }
-
-        bool met_error = false;
-        for (auto left_variables = iterator; left_variables < variables.end(); std::advance(left_variables, 1))
-        {
-            if ((*left_variables)->has_empty_domain())
-            {
-                met_error = true;
-                break;
-            }
-        }
-        if (met_error)
-        {
-            release_automatic_assignations(history);
-            if ((*iterator)->has_empty_domain())
-            {
-                if (iterator == variables.begin())
-                {
-                    break;
-                }
-                std::advance(iterator,-1);
-                rollback_assignations(*iterator,history);
-            }
-            else
-            {
-                restrict(*iterator, history);
-            }
-            continue;
         }
 
         std::advance(iterator, 1);

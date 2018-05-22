@@ -243,7 +243,7 @@ void kakuro_parser::parse(char *nom_fichier)
 
 
     auto dom_deg = [](const csp_variable_ptr &f){
-        return f->get_available_size()/f->get_constraint_count();
+        return f->get_constraint_count();
     };
 
     auto dom_deg_comp =
