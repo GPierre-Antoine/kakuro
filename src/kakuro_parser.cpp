@@ -253,6 +253,7 @@ void kakuro_parser::parse(char *nom_fichier)
                  };
 
     run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, dom_deg_comp);
+
 }
 
 /*

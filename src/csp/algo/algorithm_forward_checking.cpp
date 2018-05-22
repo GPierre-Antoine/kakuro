@@ -39,7 +39,6 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
     while (true)
     {
         cout << "Iteration : " << ++counter << ", current : " << *iterator << endl;
-        bool met_error = false;
 
 
         //si la variable courante à un domaine vide
@@ -53,9 +52,7 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
             {
                 break;
             }
-            cout << variables << endl;
             rollback_assignations(*iterator, history);
-            cout << variables << endl;
             if ((*iterator)->has_empty_domain())
             {
                 std::advance(iterator, -1);
@@ -63,6 +60,8 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
             restrict(*iterator, history);
             continue;
         }
+
+        bool met_error = false;
 
         //on met la variable la plus interessante devant
         std::sort(iterator, variables.end(), heuristic);
@@ -77,37 +76,12 @@ std::vector<std::vector<std::size_t>> csp::algorithm_forward_checking::run(std::
         {
             if (constraint->has_only_one_variable_unvaluated_left())
             {
-                //si une
-                auto variable_ptr = constraint->get_last_unvaluated_variable();
-                auto domain_size_before_filter = variable_ptr->get_available_size();
-                if (domain_size_before_filter > 1)
+                auto var = constraint->run_fc();
+                if (var->has_empty_domain())
                 {
-                    constraint->run_fc();
-                    for (auto it = variables.begin(); it != iterator && !met_error; std::advance(it, 1))
-                    {
-                        if (!(*it)->is_valuated())
-                        {
-                            cout << "met error : " << *it << endl;
-                            iterator = it;
-                            met_error = true;
-                        }
-                    }
-                    for (auto it = std::next(iterator); it != variables.cend() && !met_error; std::advance(it, 1))
-                    {
-                        if ((*it)->has_empty_domain())
-                        {
-                            cout << "met error : " << *it << endl;
-                            met_error = true;
-                        }
-                    }
-
+                    met_error=true;
+                    break;
                 }
-            }
-            if (met_error)
-            {
-                rollback_assignations(*iterator,history);
-                restrict(*iterator,history);
-                break;
             }
         }
 
