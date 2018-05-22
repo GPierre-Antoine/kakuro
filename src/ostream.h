@@ -6,7 +6,7 @@
 #define KAKURO_OSTREAM_H
 
 #include <iostream>
-#include "csp/csp_constraint.h"
+#include <vector>
 #include "typedefs.h"
 
 using std::cout;
