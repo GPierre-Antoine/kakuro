@@ -16,6 +16,7 @@
 #include "csp/constraint/csp_constraint_difference.h"
 #include "../cpp11_compat.h"
 #include "csp/algo/algorithm_forward_checking.h"
+#include "csp/algo/algorithm_forward_checking_2.h"
 
 using std::cerr;
 using std::cout;
@@ -238,7 +239,8 @@ void kakuro_parser::parse(char *nom_fichier)
 
 
     run_algorithm(csp::algorithm_backtrack(true), variables, constraints, base);
-    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, base);
+//    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, base);
+    run_algorithm(csp::algorithm_forward_checking_2(true), variables, constraints, base);
 
 
 
