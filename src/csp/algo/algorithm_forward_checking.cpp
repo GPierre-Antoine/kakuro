@@ -134,8 +134,7 @@ void csp::algorithm_forward_checking::rollback_assignations(const csp::csp_varia
     }
 }
 
-csp::algorithm_forward_checking::algorithm_forward_checking(bool stop_at_first_result) : algorithm(std::string(
-    "Forward Checking"), stop_at_first_result)
+csp::algorithm_forward_checking::algorithm_forward_checking(bool stop_at_first_result, const char * overload_name) : algorithm(std::string(overload_name), stop_at_first_result)
 {
 
 }

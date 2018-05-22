@@ -14,6 +14,7 @@ namespace csp
     class algorithm_forward_checking
             : public algorithm
     {
+    protected:
         void restrict(csp_variable_ptr variable, std::vector<csp::record> &history) const;
 
     public:
@@ -21,10 +22,11 @@ namespace csp
                                              const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
                                              heuristic heuristic) const override;
 
-        explicit algorithm_forward_checking(bool stop_at_first_result = true);
+        explicit algorithm_forward_checking(bool stop_at_first_result = true, const char *overload_name = "Forward Checking");
 
         void rollback_assignations(const csp::csp_variable &variable, std::vector<record> &history) const;
-        void rollback_assignations(const csp_variable_ptr & variable, std::vector<record> &history) const;
+
+        void rollback_assignations(const csp_variable_ptr &variable, std::vector<record> &history) const;
 
         void release_automatic_assignations(std::vector<record> &vector) const;
     };
