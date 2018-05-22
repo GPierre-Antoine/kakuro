@@ -26,7 +26,7 @@ namespace csp
         domain_t domain{1, 2, 3, 4, 5, 6, 7, 8, 9};
 
         std::size_t domain_start;
-        std::size_t value;
+        bool valuated;
 
         std::size_t constraint_count;
 
@@ -52,7 +52,6 @@ namespace csp
         void restrict_first();
         void release_last();
         void release_all();
-        void unvaluate();
         void increment_constraint_count();
         std::size_t get_constraint_count() const;
 

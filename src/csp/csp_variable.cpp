@@ -14,7 +14,7 @@
 #include <cassert>
 #include "algo/record.h"
 
-csp::csp_variable::csp_variable(const std::size_t &s) : id(s), domain_start(0), value(9)
+csp::csp_variable::csp_variable(const std::size_t &s) : id(s), domain_start(0), valuated(false)
 {
 }
 
@@ -29,20 +29,13 @@ std::size_t csp::csp_variable::get_value() const
     {
         throw std::runtime_error("Empty Domain for variable " + std::to_string(get_id()) + " ");
     }
-    return domain[value];
+    return *(std::prev(domain.cend()));
 }
 
 bool csp::csp_variable::is_valuated() const
 {
 
-    auto i1 = domain_start;
-    auto i2 = value;
-    auto i3 = domain.size();
-    auto i4 = i1<=i2;
-    auto i5 = i2<i3;
-    auto i6 = i4 && i5;
-
-    return i6;
+    return !has_empty_domain() && valuated;
 }
 
 void csp::csp_variable::restrict_first()
@@ -52,7 +45,8 @@ void csp::csp_variable::restrict_first()
         return;
     }
     domain_start += 1;
-    unvaluate();
+    if (has_empty_domain())
+        valuated=false;
 }
 
 void csp::csp_variable::release_last()
@@ -62,7 +56,6 @@ void csp::csp_variable::release_last()
         return;
     }
     domain_start -= 1;
-    unvaluate();
 }
 
 typename domain_t::iterator csp::csp_variable::get_free_iterator(const std::size_t &index)
@@ -82,17 +75,18 @@ void csp::csp_variable::assign_first_element_as_value()
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         throw std::runtime_error("Empty domain for variable " + std::to_string(get_id()));
     }
-    value = domain_start;
+    std::iter_swap(std::next(domain.begin(),domain_start),std::prev(domain.end()));
+    valuated = true;
 }
 
 void csp::csp_variable::release_all()
 {
     domain_start = 0;
-    value = 9;
+    valuated = false;
 }
 
 csp::csp_variable::csp_variable(const csp::csp_variable &other)
-    : id(other.get_id()), domain_start(other.domain_start), value(other.value), constraint_count(0)
+    : id(other.get_id()), domain_start(other.domain_start), valuated(other.valuated), constraint_count(0)
 {
 
 }
@@ -116,7 +110,6 @@ void csp::csp_variable::restrict(const std::size_t &index)
 
 void csp::csp_variable::restrict_not(const std::size_t &index)
 {
-    unvaluate();
     auto it = get_free_iterator(index);
     auto correction = 1;
     if (it == domain.end())
@@ -125,7 +118,7 @@ void csp::csp_variable::restrict_not(const std::size_t &index)
     }
     else
     {
-        std::iter_swap(it, std::prev(domain.end(), 1));
+        std::iter_swap(it, std::prev(domain.end()));
     }
 
     while (get_available_size() - correction)
@@ -148,11 +141,6 @@ typename domain_t::const_iterator csp::csp_variable::cbegin() const
 typename domain_t::const_iterator csp::csp_variable::cend() const
 {
     return domain.cend();
-}
-
-void csp::csp_variable::unvaluate()
-{
-    value = domain.size();
 }
 
 void csp::csp_variable::reset()
