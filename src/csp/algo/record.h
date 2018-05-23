@@ -20,13 +20,14 @@ namespace csp
         record_type type;
         csp_variable_ptr variable;
     public:
+        const std::size_t timestamp;
         friend void swap(csp::record &first, csp::record &second)
         {
             using std::swap;
             swap(first.type, second.type);
             swap(first.variable,second.variable);
         }
-        record(record_type type, csp_variable_ptr variable);
+        record(record_type type, csp_variable_ptr variable, std::size_t timestamp);
         record(record && r) noexcept ;
         record&operator=(const record& r) = default;
         bool is_manual () const;

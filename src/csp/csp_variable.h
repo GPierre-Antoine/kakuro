@@ -28,7 +28,7 @@ namespace csp
         std::size_t domain_start;
         bool valuated;
 
-        std::size_t constraint_count;
+        constraint_vector constraints;
 
         typename domain_t::iterator get_free_iterator(const std::size_t &index);
     public:
@@ -36,6 +36,8 @@ namespace csp
         void reset();
         explicit csp_variable(const std::size_t &s);
         csp_variable(const csp_variable &other);
+
+        void unvaluate();
 
         std::size_t get_id() const;
 
@@ -52,11 +54,12 @@ namespace csp
         void restrict_first();
         void release_last();
         void release_all();
-        void increment_constraint_count();
+        void add_constraint(csp_constraint_ptr);
         std::size_t get_constraint_count() const;
 
         typename domain_t::const_iterator cbegin() const;
         typename domain_t::const_iterator cend() const;
+        double dom_deg() const;
     };
 }
 

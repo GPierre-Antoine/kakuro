@@ -12,7 +12,7 @@ namespace csp
     class algorithm_backtrack : public algorithm
     {
     public:
-        std::vector<std::vector<size_t>> run(std::vector<csp_variable_ptr> &variables, const std::vector<std::unique_ptr<csp::csp_constraint>>&constraints,
+        std::vector<std::vector<size_t>> run(variable_vector &variables, const constraint_vector &constraints,
                                              heuristic heuristic) const override;
         explicit algorithm_backtrack(bool stop_at_first_result = true);
     };

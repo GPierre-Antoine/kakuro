@@ -9,13 +9,21 @@
 #include <utility>
 #include <algorithm>
 #include "csp_variable.h"
+#include "csp_constraint.h"
 #include <chrono>
 #include <thread>
 #include <cassert>
 #include "algo/record.h"
 
+#include "../ostream.h"
+
 csp::csp_variable::csp_variable(const std::size_t &s) : id(s), domain_start(0), valuated(false)
 {
+}
+
+double csp::csp_variable::dom_deg() const
+{
+    return static_cast<double>(get_available_size())/std::max(1ul,get_constraint_count());
 }
 
 std::size_t csp::csp_variable::get_id() const
@@ -46,7 +54,9 @@ void csp::csp_variable::restrict_first()
     }
     domain_start += 1;
     if (has_empty_domain())
-        valuated=false;
+    {
+        valuated = false;
+    }
 }
 
 void csp::csp_variable::release_last()
@@ -75,7 +85,7 @@ void csp::csp_variable::assign_first_element_as_value()
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         throw std::runtime_error("Empty domain for variable " + std::to_string(get_id()));
     }
-    std::iter_swap(std::next(domain.begin(),domain_start),std::prev(domain.end()));
+    std::iter_swap(std::next(domain.begin(), domain_start), std::prev(domain.end()));
     valuated = true;
 }
 
@@ -86,7 +96,7 @@ void csp::csp_variable::release_all()
 }
 
 csp::csp_variable::csp_variable(const csp::csp_variable &other)
-    : id(other.get_id()), domain_start(other.domain_start), valuated(other.valuated), constraint_count(0)
+    : id(other.get_id()), domain_start(other.domain_start), valuated(other.valuated), constraints()
 {
 
 }
@@ -148,13 +158,19 @@ void csp::csp_variable::reset()
     std::sort(domain.begin(), domain.end());
 }
 
-void csp::csp_variable::increment_constraint_count()
-{
-    constraint_count += 1;
-}
-
 std::size_t csp::csp_variable::get_constraint_count() const
 {
-    return constraint_count;
+    return reduce<typename constraint_vector::const_iterator, std::size_t, csp_constraint_ptr>(constraints.cbegin(), constraints.cend(), 0u, [](unsigned i, const csp_constraint_ptr &constraint)
+    {
+        return i + !constraint->is_valuated();
+    });
 }
 
+void csp::csp_variable::unvaluate()
+{
+    valuated = false;
+}
+void csp::csp_variable::add_constraint(csp_constraint_ptr ptr)
+{
+    constraints.push_back(ptr);
+}

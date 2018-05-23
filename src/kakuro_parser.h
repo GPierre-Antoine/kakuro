@@ -25,7 +25,7 @@ public:
      * @param var2
      */
     void constraint_difference(std::vector<csp_variable_ptr> &variables,
-                               std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
+                               constraint_vector &constraints,
                                std::size_t var1,
                                std::size_t var2);
 
@@ -37,12 +37,12 @@ public:
      * @param sum
      */
     void constraint_sum(std::vector<csp_variable_ptr> &variables,
-                        std::vector<std::unique_ptr<csp::csp_constraint>> &constraints, std::vector<std::size_t> portee,
+                        constraint_vector &constraints, std::vector<std::size_t> portee,
                         std::size_t arite, std::size_t sum);
 
     void run_algorithm(const csp::algorithm &algo,
-                       std::vector<csp_variable_ptr> &variables,
-                       const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
+                       variable_vector &variables,
+                       const constraint_vector &constraints,
                        heuristic heuristic);
 
 };

@@ -8,48 +8,43 @@
 #include "csp/csp_constraint.h"
 #include "csp/algorithm.h"
 
-constexpr const char *underline_start = "\033[4m";
-constexpr const char *underline_stop  = "\033[0m";
+#include <sstream>
 
-using std::ostream;
+using std::to_string;
 
+//constexpr const char *underline_start = "\033[4m";
+//constexpr const char *underline_stop  = "\033[0m";
 
-ostream &operator<<(ostream &os, const csp::algorithm &var)
+constexpr const char *underline_start = ">";
+constexpr const char *underline_stop = "<";
+
+string edit(const csp::csp_variable &var)
 {
-    return os << var.name;
-}
+    std::stringstream os;
 
-ostream &operator<<(ostream &os, const csp::csp_variable &var)
-{
-    os << std::string("V") + std::to_string(var.get_id()) + "{";
-    if (!var.has_empty_domain())
+    os
+        << std::string("V")
+            + to_string(var.get_id())
+            + "@"
+            + to_string(var.get_available_size())
+            + "#"
+            + to_string(var.get_constraint_count())
+        + "/"+to_string(var.dom_deg())+"/";
+    if (var.is_valuated())
     {
-        auto      last = std::prev(var.cend());
-        for (auto i    = var.cbegin(); i < last; std::advance(i, 1))
-        {
-            os << *i << ",";
-
-        }
-
-        if (var.is_valuated())
-        {
-            os << underline_start << *last << underline_stop;
-        }
-        else
-        {
-            os << *last;
-        }
+        return '<' + string(os.str()) + '>';
     }
-    return os << "}";
+    return string(os.str());
 }
 
-ostream &operator<<(ostream &os, const csp_variable_ptr &var)
+string edit(const csp::algorithm &var)
 {
-    return os << *var;
+    return string(var.name);
 }
 
-ostream &operator<<(ostream &os, const csp::csp_constraint &constraint)
+string edit(const csp::csp_constraint &constraint)
 {
+    std::stringstream os;
     os << constraint.edit() << " [";
     for (auto i = constraint.cbegin(); i < constraint.cend(); std::advance(i, 1))
     {
@@ -59,14 +54,27 @@ ostream &operator<<(ostream &os, const csp::csp_constraint &constraint)
         }
         os << **i;
     }
-    return os << "]";
+    os << "]";
+    return string(os.str());
+
 }
 
-ostream &operator<<(ostream &os, const std::vector<csp_variable_ptr> &constraint)
+ostream &operator<<(ostream &os, const csp::algorithm &var)
 {
-    for (const auto &i:constraint)
-    {
-        os << *i << " ";
-    }
-    return os;
+    return os << edit(var);
+}
+
+ostream &operator<<(ostream &os, const csp::csp_variable &var)
+{
+    return os << edit(var);
+}
+
+ostream &operator<<(ostream &os, const csp_variable_ptr &var)
+{
+    return os << edit(*var);
+}
+
+ostream &operator<<(ostream &os, const csp::csp_constraint &constraint)
+{
+    return os << edit(constraint);
 }

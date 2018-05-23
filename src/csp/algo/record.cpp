@@ -6,7 +6,7 @@
 #include "record.h"
 #include "../../ostream.h"
 
-csp::record::record(record_type type, csp_variable_ptr variable) : type(type), variable(variable)
+csp::record::record(record_type type, csp_variable_ptr variable, std::size_t timestamp) : type(type), variable(variable), timestamp(timestamp)
 {
 
 }
@@ -39,11 +39,8 @@ bool csp::record::is_same_variable(const csp::csp_variable &other) const
     return *variable == other;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
-csp::record::record(csp::record &&other)  noexcept // NOLINT
+csp::record::record(csp::record &&other) noexcept : timestamp(other.timestamp) // NOLINT
 {
     swap(*this, other);
 }
-#pragma clang diagnostic pop
 

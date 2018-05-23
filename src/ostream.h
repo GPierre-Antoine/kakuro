@@ -7,10 +7,14 @@
 
 #include <iostream>
 #include <vector>
+#include <sstream>
 #include "typedefs.h"
 
 using std::cout;
 using std::endl;
+using std::ostream;
+using std::vector;
+using std::string;
 
 namespace csp
 {
@@ -19,11 +23,34 @@ namespace csp
     class csp_constraint;
 }
 
-std::ostream &operator<<(std::ostream &os, const csp::csp_variable &var);
-std::ostream &operator<<(std::ostream &os, const csp_variable_ptr &var);
-std::ostream &operator<<(std::ostream &os, const csp::algorithm &var);
-std::ostream &operator<<(std::ostream &os, const csp::csp_constraint &constraint);
-std::ostream &operator<<(std::ostream &os, const std::vector<csp_variable_ptr> &constraint);
+string edit(const csp::csp_variable &var);
+string edit(const csp::algorithm &var);
+string edit(const csp::csp_constraint &constraint);
+
+template <typename T>
+string edit(const std::vector<T> &collection){
+    std::stringstream os;
+    os << "@[";
+    std::size_t counter{0};
+    for(const auto&i:collection){
+        os << edit(*i);
+        if (++counter != collection.size()){
+            os << ", ";
+        }
+    }
+    os << "]";
+    return string(os.str());
+}
+
+template <typename T>
+ostream& operator<<(ostream&os, const vector<T>&collection){
+    return os << edit(collection);
+}
+
+ostream &operator<<(ostream &os, const csp::csp_variable &var);
+ostream &operator<<(ostream &os, const csp_variable_ptr &var);
+ostream &operator<<(ostream &os, const csp::algorithm &var);
+ostream &operator<<(ostream &os, const csp::csp_constraint &constraint);
 
 
 #endif //KAKURO_OSTREAM_H

@@ -1,34 +1,30 @@
 //
-// Created by Pierre-Antoine on 20/05/2018.
+// Created by pierreantoine on 22/05/18.
 //
 
+#ifndef KAKURO_ALGORITHM_FORWARD_CHECKING_2_H
+#define KAKURO_ALGORITHM_FORWARD_CHECKING_2_H
 
-#pragma once
 
 #include "../algorithm.h"
-#include "record.h"
 
 namespace csp
 {
-
-    class algorithm_forward_checking
-            : public algorithm
+    class algorithm_forward_checking : public algorithm
     {
-    protected:
-        void restrict(csp_variable_ptr variable, std::vector<csp::record> &history) const;
+        void release_automatic_assignations(std::vector<record> &vector) const;
+        void restrict(csp_variable_ptr variable, std::vector<csp::record> &history, std::size_t value, std::size_t counter) const;
+        csp_variable_ptr record_auto(const csp_constraint & constraint, std::vector<csp::record> &history, std::size_t counter) const;
 
     public:
-        std::vector<std::vector<size_t>> run(std::vector<csp_variable_ptr> &variables,
-                                             const std::vector<std::unique_ptr<csp::csp_constraint>> &constraints,
-                                             heuristic heuristic) const override;
+        std::vector<std::vector<std::size_t>> run(variable_vector &variables, const constraint_vector &constraints,
+                                                                                     heuristic heuristic) const override;
 
-        explicit algorithm_forward_checking(bool stop_at_first_result = true, const char *overload_name = "Forward Checking");
-
+        explicit algorithm_forward_checking(bool continue_after_first);
+        void rollback_assignations(const csp_variable_ptr &variable, std::vector<csp::record> &history) const;
         void rollback_assignations(const csp::csp_variable &variable, std::vector<record> &history) const;
-
-        void rollback_assignations(const csp_variable_ptr &variable, std::vector<record> &history) const;
-
-        void release_automatic_assignations(std::vector<record> &vector) const;
     };
 }
 
+
+#endif //KAKURO_ALGORITHM_FORWARD_CHECKING_2_H
