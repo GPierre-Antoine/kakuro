@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <fstream>
+#include <utility>
 #include <vector>
 #include <limits>
 #include <cassert>
@@ -15,19 +16,20 @@
 #include "csp/constraint/csp_constraint_sum.h"
 #include "csp/constraint/csp_constraint_difference.h"
 #include "csp/algo/algorithm_forward_checking.h"
+#include "csp/algo/algo_fc_2.h"
 
 using std::cerr;
 using std::cout;
 using std::endl;
 
-typedef std::vector<Case> CaseLine;
+typedef std::vector<Case>     CaseLine;
 typedef std::vector<CaseLine> CaseGrid;
 
 void kakuro_parser::parse(char *nom_fichier)
 {
     std::ifstream filestream;
 
-    char c;            /* le caractère courant */
+    char        c;            /* le caractère courant */
     std::size_t nb_lignes;    /* le nombre de lignes de la grid */
     std::size_t nb_colonnes;  /* le nombre de colonnes de la grid */
     std::size_t num_ligne;    /* le numero de la ligne courante */
@@ -35,9 +37,9 @@ void kakuro_parser::parse(char *nom_fichier)
     std::size_t nb_variables; /* le nombre de variables déjà trouvées */
     std::size_t somme;        /* une somme */
 
-    CaseGrid grid;
+    CaseGrid                 grid;
     std::vector<std::size_t> portee;     /* la portee d'une contrainte */
-    std::size_t arite;        /* l'arité d'une contrainte */
+    std::size_t              arite;        /* l'arité d'une contrainte */
 
     filestream.open(nom_fichier, std::ifstream::in);
 
@@ -48,7 +50,7 @@ void kakuro_parser::parse(char *nom_fichier)
 
     /* on calcule la taille de la grid */
 
-    nb_lignes = 0;
+    nb_lignes   = 0;
     nb_colonnes = 0;
     filestream.get(c);
 
@@ -92,11 +94,11 @@ void kakuro_parser::parse(char *nom_fichier)
     filestream.clear();
     filestream.seekg(0, std::ios::beg);
 
-    num_ligne = 0;
-    num_colonne = 0;
+    num_ligne    = 0;
+    num_colonne  = 0;
     nb_variables = 0;
 
-    variable_vector variables;
+    variable_vector   variables;
     constraint_vector constraints;
 
     filestream.get(c);
@@ -115,7 +117,7 @@ void kakuro_parser::parse(char *nom_fichier)
         else if (c == '.')     /* case blanche */
         {
             grid[num_ligne][num_colonne].coul = BLANCHE;
-            grid[num_ligne][num_colonne].num = nb_variables;
+            grid[num_ligne][num_colonne].num  = nb_variables;
             make_variable(variables, nb_variables);
             nb_variables++;
         }
@@ -244,15 +246,10 @@ void kakuro_parser::parse(char *nom_fichier)
 
     run_algorithm(csp::algorithm_backtrack(true), variables, constraints, base);
 
-    //    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, base);
-    //    run_algorithm(csp::algorithm_forward_checking_2(true), variables, constraints, base);
-
-
-
     auto dom_deg_comp_natural = [](const csp_variable_ptr &f, const csp_variable_ptr &s)
     { return f->dom_deg() < s->dom_deg(); };
 
-    run_algorithm(csp::algorithm_forward_checking(false), variables, constraints, dom_deg_comp_natural);
+    run_algorithm(csp::algo_fc_2(false), variables, constraints, dom_deg_comp_natural);
 
 }
 
@@ -300,7 +297,7 @@ void kakuro_parser::constraint_sum(std::vector<csp_variable_ptr> &variables,
                                    std::size_t arite,
                                    std::size_t sum)
 {
-    std::string text;
+    std::string                   text;
     std::vector<csp_variable_ptr> holder;
     holder.reserve(arite);
     for (std::size_t index = 0; index < arite; index++)
@@ -329,35 +326,31 @@ void kakuro_parser::run_algorithm(const csp::algorithm &algo,
         i->release_all();
         i->reset();
     }
-    std::sort(variables.begin(), variables.end(), [](const csp_variable_ptr &v1, const csp_variable_ptr &v2)
-    {
-        return v1->get_id() < v2->get_id();
-    });
 
-    std::clock_t begin = std::clock();
-    auto affectations = algo.run(variables, constraints, heuristic);
-    std::clock_t end = std::clock();
+    std::clock_t begin        = std::clock();
+    auto         affectations = algo.run(variables, constraints, std::move(heuristic));
+    std::clock_t end          = std::clock();
 
     auto elasped_clock = (static_cast<std::size_t >(end - begin));
 
     cout << "Ran algorithm " + algo.name + " in " << elasped_clock << " clocks" << endl;
     cout << "Affectations found : " << affectations.size() << endl;
-    auto solution_number = 0u;
+    auto            solution_number = 0u;
     for (const auto &solution:affectations)
     {
 
-        std::string text;
+        std::string     text;
         for (const auto &value:solution)
         {
             text += "{" + std::to_string(value) + "}";
         }
         cout
-            << "Solution #"
-            << std::setfill('0')
-            << std::setw(3)
-            << std::to_string(++solution_number)
-            << " : "
-            << text
-            << endl;
+                << "Solution #"
+                << std::setfill('0')
+                << std::setw(3)
+                << std::to_string(++solution_number)
+                << " : "
+                << text
+                << endl;
     }
 }

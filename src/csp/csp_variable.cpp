@@ -35,7 +35,7 @@ std::size_t csp::csp_variable::get_value() const
 {
     if (!is_valuated())
     {
-        throw std::runtime_error("Empty Domain for variable " + std::to_string(get_id()) + " ");
+        throw std::runtime_error("Unvaluated variable " + std::to_string(get_id()) + " : " + edit(*this));
     }
     return *(std::prev(domain.cend()));
 }
@@ -83,7 +83,7 @@ void csp::csp_variable::assign_first_element_as_value()
     if (has_empty_domain())
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        throw std::runtime_error("Empty domain for variable " + std::to_string(get_id()));
+        throw std::runtime_error("Empty domain for variable " + std::to_string(get_id()) + " : " + edit(*this));
     }
     std::iter_swap(std::next(domain.begin(), domain_start), std::prev(domain.end()));
     valuated = true;

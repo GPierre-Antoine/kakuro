@@ -4,6 +4,7 @@
 
 
 #include "algorithm.h"
+#include <utility>
 #include "../ostream.h"
 
 void csp::algorithm::record_solution(std::vector<std::vector<std::size_t>> &affectations,
@@ -16,7 +17,7 @@ void csp::algorithm::record_solution(std::vector<std::vector<std::size_t>> &affe
     }
     affectations.push_back(affectation);
 }
-csp::algorithm::algorithm(std::string name, bool stop_at_first_result) : name(name), stop_at_first_result(stop_at_first_result)
+csp::algorithm::algorithm(std::string name, bool stop_at_first_result) : name(std::move(name)), stop_at_first_result(stop_at_first_result)
 {
 
 }

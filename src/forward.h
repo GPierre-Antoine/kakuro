@@ -7,6 +7,8 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
+
 namespace csp
 {
     class csp_variable;

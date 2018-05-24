@@ -4,9 +4,11 @@
 
 
 #include "record.h"
+#include <utility>
 #include "../../ostream.h"
 
-csp::record::record(record_type type, csp_variable_ptr variable, std::size_t timestamp) : type(type), variable(variable), timestamp(timestamp)
+csp::record::record(record_type type, csp_variable_ptr variable, std::size_t timestamp)
+        : type(type), variable(std::move(variable)), timestamp(timestamp)
 {
 
 }
