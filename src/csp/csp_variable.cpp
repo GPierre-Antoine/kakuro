@@ -37,12 +37,11 @@ std::size_t csp::csp_variable::get_value() const
     {
         throw std::runtime_error("Unvaluated variable " + std::to_string(get_id()) + " : " + edit(*this));
     }
-    return *(std::prev(domain.cend()));
+    return *(std::next(domain.begin(),domain_start));
 }
 
 bool csp::csp_variable::is_valuated() const
 {
-
     return !has_empty_domain() && valuated;
 }
 
@@ -53,10 +52,7 @@ void csp::csp_variable::restrict_first()
         return;
     }
     domain_start += 1;
-    if (has_empty_domain())
-    {
-        valuated = false;
-    }
+    unvaluate();
 }
 
 void csp::csp_variable::release_last()
@@ -66,6 +62,7 @@ void csp::csp_variable::release_last()
         return;
     }
     domain_start -= 1;
+    valuated=false;
 }
 
 typename domain_t::iterator csp::csp_variable::get_free_iterator(const std::size_t &index)
@@ -85,14 +82,13 @@ void csp::csp_variable::assign_first_element_as_value()
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         throw std::runtime_error("Empty domain for variable " + std::to_string(get_id()) + " : " + edit(*this));
     }
-    std::iter_swap(std::next(domain.begin(), domain_start), std::prev(domain.end()));
     valuated = true;
 }
 
 void csp::csp_variable::release_all()
 {
     domain_start = 0;
-    valuated = false;
+    unvaluate();
 }
 
 csp::csp_variable::csp_variable(const csp::csp_variable &other)
@@ -156,6 +152,7 @@ typename domain_t::const_iterator csp::csp_variable::cend() const
 void csp::csp_variable::reset()
 {
     std::sort(domain.begin(), domain.end());
+    unvaluate();
 }
 
 std::size_t csp::csp_variable::get_constraint_count() const

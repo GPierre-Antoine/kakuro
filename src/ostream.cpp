@@ -7,6 +7,7 @@
 #include "csp/csp_variable.h"
 #include "csp/csp_constraint.h"
 #include "csp/algorithm.h"
+#include "csp/algo/record.h"
 
 #include <sstream>
 
@@ -29,7 +30,9 @@ string edit(const csp::csp_variable &var)
             + to_string(var.get_available_size())
             + "#"
             + to_string(var.get_constraint_count())
-        + "/"+to_string(var.dom_deg())+"/";
+            + "/"
+            + to_string(var.dom_deg())
+            + "/";
     if (var.is_valuated())
     {
         return '<' + string(os.str()) + '>';
@@ -37,9 +40,47 @@ string edit(const csp::csp_variable &var)
     return string(os.str());
 }
 
+string edit_value_v(const csp::csp_variable &var)
+{
+    std::string value;
+    if (var.is_valuated())
+    {
+        value = "{" + std::to_string(var.get_value()) + "}";
+    }
+    else
+    {
+        value = "#ERR";
+    }
+
+    value += "(" + std::to_string(var.get_available_size()) + ")";
+
+    return std::string("V") + std::to_string(var.get_id()) + value;
+}
+
+string edit_domain(const csp::csp_variable &var)
+{
+    return std::string("V") + std::to_string(var.get_id()) + "" + edit(var.cbegin(), var.cend());
+}
+
+string edit(const csp::record &r)
+{
+    return "{id:"
+        + std::to_string(r.get_variable()->get_id())
+        + ",ts:"
+        + std::to_string(r.timestamp)
+        + ",type:"
+        + (r.is_manual() ? "M" : "A")
+        + "}";
+}
+
 string edit(const csp::algorithm &var)
 {
     return string(var.name);
+}
+
+string edit(const std::size_t &var)
+{
+    return std::to_string(var);
 }
 
 string edit(const csp::csp_constraint &constraint)
@@ -77,4 +118,44 @@ ostream &operator<<(ostream &os, const csp_variable_ptr &var)
 ostream &operator<<(ostream &os, const csp::csp_constraint &constraint)
 {
     return os << edit(constraint);
+}
+
+std::string tellHistory(const std::vector<csp::record> &history, std::size_t explore)
+{
+    std::stringstream os;
+    if (history.size() > explore)
+    {
+        auto milestone = std::next(history.rbegin(), explore);
+        os
+            << "History at index "
+            << std::distance(history.rend(), milestone)
+            << "  :"
+            << edit(history.rbegin(), milestone)
+            << endl;
+    }
+    else
+    {
+        os << "History : " << edit(history.rbegin(), history.rend()) << endl;
+    }
+
+    return os.str();
+}
+
+string edit_fn(variable_vector::const_iterator first,
+               variable_vector::const_iterator second,
+               std::function<string(const csp::csp_variable&)> fn)
+{
+    std::stringstream os;
+    os << "{size:" << std::to_string(std::distance(first, second)) << ",values:[";
+    while (first != second)
+    {
+        os << fn(**first);
+        first += 1;
+        if (first != second)
+        {
+            os << ", ";
+        }
+    }
+    os << "]}";
+    return os.str();
 }

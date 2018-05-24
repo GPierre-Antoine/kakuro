@@ -5,6 +5,7 @@
 #include "algo_fc_2.h"
 #include "../../ostream.h"
 
+
 /**
  *
  * @param f
@@ -12,9 +13,15 @@
  * @param timestamp
  * @param type
  */
-void restrict(csp_variable_ptr &f, std::vector<csp::record> &history, std::size_t timestamp, record_type type)
+void restrict_automatic(csp_variable_ptr &f, std::vector<csp::record> &history, std::size_t timestamp)
 {
-    history.emplace_back(csp::record(type, f, timestamp));
+    history.emplace_back(csp::record(record_type::automatic, f, timestamp));
+}
+
+void restrict_manual(csp_variable_ptr &f, std::vector<csp::record> &history, std::size_t timestamp)
+{
+    f->restrict_first();
+    history.emplace_back(csp::record(record_type::manual, f, timestamp));
 }
 
 /**
@@ -24,7 +31,15 @@ void restrict(csp_variable_ptr &f, std::vector<csp::record> &history, std::size_
  */
 void rollback(csp_variable_ptr &f, std::vector<csp::record> &history)
 {
-    while (!history.empty() && (!history.back().is_same_variable(*f) || !history.back().is_manual()))
+    while (!history.empty() && (!history.back().is_same_variable(*f) && history.back().timestamp == f->get_id()))
+    {
+        history.pop_back();
+    }
+}
+
+void release_auto(std::vector<csp::record> &history)
+{
+    while (!history.empty() && !history.back().is_manual())
     {
         history.pop_back();
     }
@@ -35,65 +50,90 @@ csp::algo_fc_2::algo_fc_2(bool stop_at_first_result) : algorithm(std::string("FC
 
 }
 
-std::vector<std::vector<size_t>>
-csp::algo_fc_2::run(variable_vector &variables, const constraint_vector &constraints, heuristic heuristic) const
+std::vector<std::vector<size_t>> csp::algo_fc_2::run(variable_vector &variables,
+                                                     const constraint_vector &constraints,
+                                                     heuristic heuristic) const
 {
     std::vector<std::vector<size_t>> solutions;
-    std::vector<csp::record>         history;
+    std::vector<csp::record> history;
     history.reserve(1000);
     auto it_variable = variables.begin();
 
-    std::cout << edit(variables) << std::endl;
+    auto counter = 0ul;
 
     while (true)
     {
         //state is clear at the begining
 
-        //sort with heuristic
-        std::sort(variables.begin(), variables.end(), heuristic);
+        //make a timestamp
+        std::size_t change_index;
 
-        //assign new value
-        (*it_variable)->assign_first_element_as_value();
 
-        std::size_t change_index = history.size();
-
-        //reverbate changes
-        for (const auto &i:constraints)
-        {
-            if (i->has_only_one_variable_unvaluated_left())
-            {
-                auto variable                      = i->get_last_unvaluated_variable();
-                auto domain_size_before_constraint = variable->get_available_size();
-                i->run_fc();
-                auto domain_size_after_constraint = variable->get_available_size();
-                auto stack                        = domain_size_before_constraint - domain_size_after_constraint;
-                while (stack > 0)
-                {
-                    stack -= 1;
-                    restrict(variable, history, change_index, record_type::automatic);
-                }
-            }
-        }
-
-        //todo prove valid to place it here
         if (it_variable == variables.end())
         {
             //found solution
             record_solution(solutions, variables);
 
+            constexpr const std::size_t explore = 10;
+
             if (stop_at_first_result)
             {
                 break;
             }
+            //it variable now re-points toward a csp::csp_variable
+            it_variable = std::prev(it_variable);
 
-            //rollback to previous
-            std::advance(it_variable, -1);
-            auto compute_size = history.empty() ? 0 : history.back().timestamp;
-            restrict(*it_variable, history, compute_size, record_type::manual);
+            change_index = (*it_variable)->get_id();
+            release_auto(history);
+
+            while (!history.empty() && !history.back().is_same_variable(**it_variable))
+            {
+                //rollback to previous
+                (*it_variable)->unvaluate();
+                it_variable = std::prev(it_variable);
+            }
+            change_index = (*it_variable)->get_id();
+            restrict_manual(*it_variable, history, change_index);
+
+            if (!(*it_variable)->has_empty_domain())
+            {
+                (*it_variable)->assign_first_element_as_value();
+            }
+            break;
+        }
+        else
+        {
+            //sort with heuristic
+            std::sort(it_variable, variables.end(), heuristic);
+
+            //assign new value
+            (*it_variable)->assign_first_element_as_value();
+
+            //timestamp = current variable id
+            change_index = (*it_variable)->get_id();
+
+            //reverbate changes
+            for (const auto &i:constraints)
+            {
+                if (i->has_only_one_variable_unvaluated_left())
+                {
+                    auto variable = i->get_last_unvaluated_variable();
+                    auto domain_size_before_constraint = variable->get_available_size();
+                    i->run_fc();
+                    auto domain_size_after_constraint = variable->get_available_size();
+                    auto stack = domain_size_before_constraint - domain_size_after_constraint;
+                    while (stack > 0)
+                    {
+                        stack -= 1;
+                        //record all new mecanisme under current variable id
+                        restrict_automatic(variable, history, change_index);
+                    }
+                }
+            }
         }
 
         //check error
-        bool            met_error = false;
+        bool met_error = false;
         for (const auto &i:variables)
         {
             if (i->has_empty_domain())
@@ -105,34 +145,38 @@ csp::algo_fc_2::run(variable_vector &variables, const constraint_vector &constra
         //clear error and return to start
         if (met_error)
         {
-            while (!history.empty() && history.back().timestamp == change_index && !history.back().is_manual())
+            while (!history.empty() && history.back().timestamp == change_index)
             {
                 history.pop_back();
             }
-            restrict(*it_variable, history, change_index, record_type::manual);
+            restrict_manual(*it_variable, history, change_index);
 
             while ((*it_variable)->has_empty_domain() && it_variable != variables.begin())
             {
-                std::advance(it_variable, -1);
+                it_variable = std::prev(it_variable);
                 rollback(*it_variable, history);
-                restrict(*it_variable, history, change_index, record_type::manual);
+                change_index = (*it_variable)->get_id();
+                restrict_manual(*it_variable, history, change_index);
             }
 
             //if first variable is empty, then exit
             // - variables are sorted only when free
             // - and break if first is sorted
             // therefore variable.begin has empty domain means itvariable=begin
+
             if ((**variables.begin()).has_empty_domain())
             {
                 break;
             }
 
-            //now clear from error, go to next variable
-            std::advance(it_variable, 1);
-
+            continue;
         }
+        //now clear from error, go to next variable
+        it_variable = std::next(it_variable);
 
     }
 
     return solutions;
 }
+
+#undef PR

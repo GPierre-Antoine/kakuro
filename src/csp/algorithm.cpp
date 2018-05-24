@@ -11,7 +11,6 @@ void csp::algorithm::record_solution(std::vector<std::vector<std::size_t>> &affe
                                      const variable_vector &variables) const
 {
     std::vector<std::size_t> affectation(variables.size());
-    cout << edit(variables) << endl;
     for (const auto &v : variables)
     {
         affectation[v->get_id()] = v->get_value();
