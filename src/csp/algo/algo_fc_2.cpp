@@ -53,18 +53,22 @@ csp::algo_fc_2::run(variable_vector &variables, const constraint_vector &constra
         //assign new value
         (*it_variable)->assign_first_element_as_value();
 
-        std::cout << (*it_variable)->get_value() << std::endl;
-
         std::size_t change_index = history.size();
 
         //reverbate changes
         for (const auto&i:constraints){
             if (i->has_only_one_variable_unvaluated_left()){
+                std::cout << __LINE__ << std::endl;
                 auto variable = i->get_last_unvaluated_variable();
+                std::cout << __LINE__ << std::endl;
                 auto domain_size_before_constraint = variable->get_available_size();
+                std::cout << __LINE__ << std::endl;
                 i->run_constraint();
+                std::cout << __LINE__ << std::endl;
                 auto domain_size_after_constraint = variable->get_available_size();
+                std::cout << __LINE__ << std::endl;
                 auto stack = domain_size_before_constraint - domain_size_after_constraint;
+                std::cout << __LINE__ << std::endl;
                 while (stack>0){
                     stack-=1;
                     restrict(variable,history,change_index,record_type::automatic);
