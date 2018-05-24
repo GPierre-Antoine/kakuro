@@ -145,7 +145,7 @@ std::vector<std::vector<size_t>> csp::algo_fc_2::run(variable_vector &variables,
         //clear error and return to start
         if (met_error)
         {
-            while (!history.empty() && history.back().timestamp == change_index)
+            while (!history.empty() && history.back().timestamp == change_index && !history.back().is_manual())
             {
                 history.pop_back();
             }
