@@ -48,10 +48,10 @@ void rollback_different_variable(csp_variable_ptr &f, record_vector &history)
 
     while (!history.empty() && !history.back().is_same_variable(*f))
     {
-        cout << lf
-             << "id comparée: " << history.back().get_variable()->get_id() << endl
-             << lf
-             << "timestamp (non-comparé ): " << history.back().timestamp << endl
+        cout
+             << lf << "id comparée               : " << history.back().get_variable()->get_id() << endl
+             << lf << "timestamp   (non-comparé) : " << history.back().timestamp << endl
+             << lf << "is auto     (non-comparé) : " << std::boolalpha << !history.back().is_manual() << endl
                 ;
         history.pop_back();
     }
@@ -79,15 +79,15 @@ bool resolve_error(const variable_vector &variables, variable_vector::iterator &
 
     while (true)
     {
-        cout << lf << "error treatment rolling back all that is not : " << **it_variable << endl;
+        cout << endl << endl << lf << "error treatment rolling back all that is not : V" << (**it_variable).get_id() << endl;
 
         rollback_different_variable(*it_variable, history);
 
+        cout <<endl<< lf << "domains after rollback    : " << edit_fn(it_variable, variables.end(), edit_domain) << endl;
+
         restrict_manual(*it_variable, history, (*it_variable)->get_id());
-        cout << lf << "error treatment after restriction :  " << edit_domain(**it_variable) << endl;
         if (!(*it_variable)->has_empty_domain())
         {
-            cout <<endl<< lf << "domains after treatment" << edit_fn(it_variable, variables.end(), edit_domain) << endl;
             return true;
         }
         if (it_variable == variables.begin())
