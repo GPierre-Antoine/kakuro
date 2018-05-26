@@ -16,7 +16,8 @@
 #include "csp/constraint/csp_constraint_sum.h"
 #include "csp/constraint/csp_constraint_difference.h"
 #include "csp/algo/algorithm_forward_checking.h"
-#include "csp/algo/algo_fc_2.h"
+#include "csp/algo/algo_forward_checking.h"
+#include "ostream.h"
 
 using std::cerr;
 using std::cout;
@@ -249,7 +250,7 @@ void kakuro_parser::parse(char *nom_fichier)
     auto dom_deg_comp_natural = [](const csp_variable_ptr &f, const csp_variable_ptr &s)
     { return f->dom_deg() < s->dom_deg(); };
 
-    run_algorithm(csp::algo_fc_2(false), variables, constraints, dom_deg_comp_natural);
+    run_algorithm(csp::algo_forward_checking(false), variables, constraints, dom_deg_comp_natural);
 
 }
 
@@ -333,7 +334,7 @@ void kakuro_parser::run_algorithm(const csp::algorithm &algo,
 
     auto elasped_clock = (static_cast<std::size_t >(end - begin));
 
-    cout << "Ran algorithm " + algo.name + " in " << elasped_clock << " clocks" << endl;
+    cout << "Ran algorithm " << edit(algo) << " in " << elasped_clock << " clocks" << endl;
     cout << "Affectations found : " << affectations.size() << endl;
     auto            solution_number = 0u;
     for (const auto &solution:affectations)

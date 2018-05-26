@@ -75,7 +75,7 @@ string edit(const csp::record &r)
 
 string edit(const csp::algorithm &var)
 {
-    return string(var.name);
+    return string(var.name) + " " + (var.stop_at_first_result ? "{first}":"{all}");
 }
 
 string edit(const std::size_t &var)
@@ -158,4 +158,8 @@ string edit_fn(variable_vector::const_iterator first,
     }
     os << "]}";
     return os.str();
+}
+
+string edit(const const_iter_v & variable){
+    return  edit(**variable);
 }

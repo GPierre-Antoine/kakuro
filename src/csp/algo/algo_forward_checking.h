@@ -10,10 +10,10 @@
 
 namespace csp
 {
-    class algo_fc_2 : public algorithm
+    class algo_forward_checking : public algorithm
     {
     public:
-        explicit algo_fc_2(bool stop_at_first_result);
+        explicit algo_forward_checking(bool stop_at_first_result);
         std::vector<std::vector<size_t>> run(variable_vector &variables, const constraint_vector &constraints, heuristic heuristic) const override ;
     };
 }

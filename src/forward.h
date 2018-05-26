@@ -39,5 +39,7 @@ T reduce(iter_t begin, iter_t end, T init, std::function<T (T,type)> f)
 }
 
 typedef std::vector<csp_constraint_ptr> constraint_vector;
+typedef variable_vector::iterator iter_v;
+typedef variable_vector::const_iterator const_iter_v;
 
 #endif //KAKURO_FORWARD_H

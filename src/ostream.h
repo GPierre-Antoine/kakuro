@@ -25,6 +25,7 @@ namespace csp
     class record;
 }
 
+string edit(const const_iter_v &var);
 string edit(const csp::csp_variable &var);
 string edit_value_v(const csp::csp_variable &var);
 string edit_domain(const csp::csp_variable &var);
