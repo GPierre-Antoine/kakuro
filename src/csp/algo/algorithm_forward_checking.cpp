@@ -111,6 +111,29 @@ bool resolve_error_unfixed(const variable_vector &variables,
     }
 }
 
+bool resolve_error_with_constraint(const variable_vector &variables,
+                                   variable_vector::iterator &it_variable,
+                                   csp::history &history)
+{
+    auto begin = variables.begin();
+    for (;; std::advance(it_variable, -1))
+    {
+        while (history && history.has_constraint() && !history.get_constraint()->has_a_empty_variable())
+        {
+            history.pop();
+        }
+        restrict_manual(*it_variable, history, (*it_variable)->get_id());
+        if (!(*it_variable)->has_empty_domain())
+        {
+            return true;
+        }
+        if (it_variable == begin)
+        {
+            return false;
+        }
+    }
+}
+
 csp::algorithm_forward_checking::algorithm_forward_checking(bool find_all_results) : algorithm(std::string(
     "Forward Checking"), find_all_results)
 {

@@ -14,7 +14,7 @@ csp::csp_constraint_sum::csp_constraint_sum(std::size_t id, std::size_t sum) : c
 bool csp::csp_constraint_sum::run_constraint() const
 {
     std::size_t accumulation = 0;
-    for (const auto &i:associated_variables)
+    for (const auto &i:variables)
     {
         accumulation += i->get_value();
     }
@@ -24,7 +24,7 @@ csp_variable_ptr csp::csp_constraint_sum::run_fc_child() const
 {
     auto free = get_last_unvaluated_variable();
     std::size_t partial_sum = 0u;
-    for (const auto &i:associated_variables)
+    for (const auto &i:variables)
     {
         if (i->is_valuated())
         {

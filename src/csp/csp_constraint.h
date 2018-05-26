@@ -18,7 +18,7 @@ namespace csp
     {
     protected:
         virtual csp_variable_ptr run_fc_child() const=0;
-        std::vector<csp_variable_ptr> associated_variables{};
+        std::vector<csp_variable_ptr> variables{};
     public:
         const std::size_t id;
         virtual std::string edit()const = 0;
@@ -26,6 +26,7 @@ namespace csp
         bool is_valuated() const;
         bool is_satisfied() const;
         bool has_only_one_variable_unvaluated_left() const;
+        bool has_a_empty_variable() const;
 
         csp_variable_ptr get_last_unvaluated_variable() const;
         csp_variable_ptr run_fc() const;

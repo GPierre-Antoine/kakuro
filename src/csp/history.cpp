@@ -12,7 +12,7 @@ void csp::history::track(const csp_constraint_ptr &constraint, csp::record &&r)
     record_track.emplace(couple(constraint, std::move(r)));
 }
 
-bool csp::history::empty()
+bool csp::history::empty() const
 {
     return record_track.empty();
 }
@@ -50,4 +50,8 @@ bool csp::history::has_constraint()
 const csp_variable_ptr csp::history::get_variable()
 {
     return get_record().get_variable();
+}
+csp::history::operator bool() const
+{
+    return !empty();
 }

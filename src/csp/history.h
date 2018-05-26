@@ -25,13 +25,14 @@ namespace csp
         history() = default;
         history(const history &) = delete;
         void track(const csp_constraint_ptr &constraint, csp::record &&r);
-        bool empty();
+        bool empty() const;
         void pop();
         couple &top();
         csp_constraint_ptr &get_constraint();
         record &get_record();
         const csp_variable_ptr get_variable();
         bool has_constraint();
+        explicit operator bool() const;
     };
 
 }

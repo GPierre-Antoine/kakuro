@@ -7,7 +7,7 @@
 
 bool csp::csp_constraint::is_valuated() const
 {
-    for (const auto &i : associated_variables)
+    for (const auto &i : variables)
     {
         if (!i->is_valuated())
         {
@@ -25,7 +25,7 @@ csp::csp_constraint::csp_constraint(std::size_t id) : id(id)
 bool csp::csp_constraint::has_only_one_variable_unvaluated_left() const
 {
     std::size_t counter{0};
-    for (const auto &i:associated_variables)
+    for (const auto &i:variables)
     {
         if (!i->is_valuated())
         {
@@ -34,6 +34,17 @@ bool csp::csp_constraint::has_only_one_variable_unvaluated_left() const
     }
     return counter == 1;
 }
+bool csp::csp_constraint::has_a_empty_variable() const
+{
+    for (const auto &variable:variables)
+    {
+        if (variable->has_empty_domain())
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 csp_variable_ptr csp::csp_constraint::get_last_unvaluated_variable() const
 {
@@ -41,7 +52,7 @@ csp_variable_ptr csp::csp_constraint::get_last_unvaluated_variable() const
     {
         throw std::runtime_error("More than one variable left");
     }
-    for (auto &i:associated_variables)
+    for (auto &i:variables)
     {
         if (!i->is_valuated())
         {
@@ -65,14 +76,14 @@ bool csp::csp_constraint::is_satisfied() const
 }
 std::vector<csp_variable_ptr>::const_iterator csp::csp_constraint::cbegin() const
 {
-    return associated_variables.cbegin();
+    return variables.cbegin();
 }
 std::vector<csp_variable_ptr>::const_iterator csp::csp_constraint::cend() const
 {
-    return associated_variables.cend();
+    return variables.cend();
 }
 void csp::csp_constraint::add_variable(csp_variable_ptr variable)
 {
-    associated_variables.push_back(variable);
+    variables.push_back(variable);
 }
 
