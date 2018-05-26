@@ -29,7 +29,7 @@ namespace csp
                              const constraint_vector &constraints,
                              heuristic heuristic) const =0;
         explicit algorithm(std::string name, bool stop_at_first_result = true);
-        iter_v get_lowest_variable(iter_v begin, iter_v end, heuristic_f h) const;
+        iter_v find_lower_value_variable(iter_v begin, iter_v end, heuristic_f h) const;
     };
 }
 

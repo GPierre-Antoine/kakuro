@@ -11,7 +11,7 @@ csp::algorithm::algorithm(std::string name, bool stop_at_first_result)
 {
 
 }
-iter_v csp::algorithm::get_lowest_variable(iter_v begin, iter_v end, heuristic_f h) const
+iter_v csp::algorithm::find_lower_value_variable(iter_v begin, iter_v end, heuristic_f h) const
 {
     auto ref=begin;
     while (begin!=end){

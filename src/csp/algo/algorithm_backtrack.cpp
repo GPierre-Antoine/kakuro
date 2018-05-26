@@ -24,7 +24,7 @@ csp::solution csp::algorithm_backtrack::run(variable_vector &variables,
     while (true)
     {
         tracker.inc_node_count();
-        auto it = get_lowest_variable(it_variable, variables.end(), heuristic);
+        auto it = find_lower_value_variable(it_variable, variables.end(), heuristic);
         if (it_variable != it)
         {
             std::iter_swap(it_variable, it);
