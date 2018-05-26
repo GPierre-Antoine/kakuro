@@ -82,11 +82,14 @@ void rollback_unfixed_variables(const std::vector<std::size_t> &delete_values, c
 }
 
 bool resolve_error_unfixed(const variable_vector &variables,
-                           variable_vector::iterator &it_variable, csp::history &history)
+                           variable_vector::iterator &it_variable,
+                           csp::history &history)
 {
+    auto begin = variables.begin();
+    auto end = variables.end();
     std::vector<std::size_t> unfixed;
-    unfixed.reserve(static_cast<std::size_t>(std::distance(variables.begin(), variables.end())));
-    for (auto it = std::next(it_variable); it != variables.end(); std::advance(it, 1))
+    unfixed.reserve(static_cast<std::size_t>(std::distance(begin, end)));
+    for (auto it = std::next(it_variable); it != end; std::advance(it, 1))
     {
         unfixed.emplace_back((*it)->get_id());
     }
@@ -99,32 +102,7 @@ bool resolve_error_unfixed(const variable_vector &variables,
             //            assert_variables_in_range_noempty(begin, end);
             return true;
         }
-        if (it_variable == variables.begin())
-        {
-            return false;
-        }
-        unfixed.emplace_back((*it_variable)->get_id());
-        std::advance(it_variable, -1);
-    }
-}
-bool resolve_error_last(const variable_vector &variables, variable_vector::iterator &it_variable, csp::history &history)
-{
-    std::vector<std::size_t> unfixed;
-    unfixed.reserve(static_cast<std::size_t>(std::distance(variables.begin(), variables.end())));
-    for (auto it = std::next(it_variable); it != variables.end(); std::advance(it, 1))
-    {
-        unfixed.emplace_back((*it)->get_id());
-    }
-    for (;;)
-    {
-        rollback_unfixed_variables(unfixed, history);
-        restrict_manual(*it_variable, history, (*it_variable)->get_id());
-        if (!(*it_variable)->has_empty_domain())
-        {
-            //            assert_variables_in_range_noempty(begin, end);
-            return true;
-        }
-        if (it_variable == variables.begin())
+        if (it_variable == begin)
         {
             return false;
         }
@@ -153,26 +131,38 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
     while (true)
     {
         tracker.inc_node_count();
+        //state is clear at the begining
+
+        //check error
         bool met_error = false;
+
         if (it_variable == variables.end())
         {
+            //found solution
             tracker.add_record(variables);
+
             if (stop_at_first_result)
             {
                 break;
             }
+            //it variable now re-points toward a csp::csp_variable
             it_variable = std::prev(it_variable);
             met_error = true;
+            //treat current affectation as error, it will be rolled-back the same
         }
         else
         {
+            //sort with heuristic
             auto it = find_lower_value_variable(it_variable, variables.end(), heuristic);
             if (it_variable != it)
             {
                 std::iter_swap(it_variable, it);
             }
 
+            //assign new value
             (*it_variable)->assign_first_element_as_value();
+
+            //reverbate changes
             for (const auto &constraint:constraints)
             {
                 tracker.inc_constraint_count();
@@ -183,14 +173,20 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
                 }
             }
         }
+
+        //clear error and return to start
         if (met_error)
         {
             if (!resolve_error_unfixed(variables, it_variable, history))
             {
+                //if could not resolve error, exit
+                // <=> backtracked until first variable has empty domain
                 break;
             }
             continue;
         }
+
+        //now clear from error, go to next variable
         it_variable = std::next(it_variable);
     }
     tracker.stop_chrono();
