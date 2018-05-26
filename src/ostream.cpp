@@ -130,8 +130,7 @@ void os_short(ostream &os, const csp::solution &solution)
             + " with heuristic "
             + solution.heuristic_name
             + " in a timelapse of "
-            + std::to_string(solution.get_execution_time())
-            + "s"
+            + std::to_string(solution.get_execution_time()) + " CPU time"
         << std::endl;
     os << "Solutions found       : " << solution.get_records().size() << std::endl;
     os << "Constraints tested    : " << solution.get_constraint_count() << std::endl;
@@ -162,7 +161,7 @@ void os_long(ostream &os, const csp::solution &solution)
 ostream &operator<<(ostream &os, const csp::solution &solution)
 {
     os_short(os, solution);
-    os_long(os << std::endl, solution);
+    //    os_long(os << std::endl, solution);
     return os;
 }
 

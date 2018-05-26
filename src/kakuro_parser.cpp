@@ -246,11 +246,16 @@ void kakuro_parser::parse(char *nom_fichier)
     { return f->get_id(); });
     csp::heuristic dom_deg("dom_deg", [](const csp_variable_ptr &f)
     { return f->dom_deg(); });
+    csp::heuristic anti_dom_deg("dom_deg", [](const csp_variable_ptr &f)
+    { return -f->dom_deg(); });
 
-    run_algorithm(csp::algorithm_backtrack(true), variables, constraints, base);
-    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, base);
-    run_algorithm(csp::algorithm_backtrack(true), variables, constraints, dom_deg);
-    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, dom_deg);
+    const bool stop_after_first = false;
+
+    run_algorithm(csp::algorithm_backtrack(stop_after_first), variables, constraints, base);
+    run_algorithm(csp::algorithm_backtrack(stop_after_first), variables, constraints, anti_dom_deg);
+    run_algorithm(csp::algorithm_forward_checking(stop_after_first), variables, constraints, base);
+    run_algorithm(csp::algorithm_backtrack(stop_after_first), variables, constraints, dom_deg);
+    run_algorithm(csp::algorithm_forward_checking(stop_after_first), variables, constraints, dom_deg);
 
 }
 

@@ -44,7 +44,7 @@ void csp::solution::add_record(const variable_vector &variables)
 
 std::clock_t csp::solution::get_execution_time() const
 {
-    return (end_time - start_time) / CLOCKS_PER_SEC;
+    return (end_time - start_time);
 }
 size_t csp::solution::get_constraint_count() const
 {
