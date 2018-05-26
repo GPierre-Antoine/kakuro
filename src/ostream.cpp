@@ -7,9 +7,6 @@
 #include "csp/csp_variable.h"
 #include "csp/csp_constraint.h"
 #include "csp/algorithm.h"
-#include "csp/algo/record.h"
-
-#include <sstream>
 
 using std::to_string;
 
@@ -75,7 +72,12 @@ string edit(const csp::record &r)
 
 string edit(const csp::algorithm &var)
 {
-    return string(var.name) + " " + (var.stop_at_first_result ? "{first}":"{all}");
+    return string(var.name) + " " + (var.stop_at_first_result ? "{first solution only}" : "{all solutions}");
+}
+
+string edit(const csp::heuristic &var)
+{
+    return string(var.name);
 }
 
 string edit(const std::size_t &var)
@@ -120,6 +122,50 @@ ostream &operator<<(ostream &os, const csp::csp_constraint &constraint)
     return os << edit(constraint);
 }
 
+void os_short(ostream &os, const csp::solution &solution)
+{
+    os
+        << "Ran algorithm "
+            + solution.algorithm_info
+            + " with heuristic "
+            + solution.heuristic_name
+            + " in a timelapse of "
+            + std::to_string(solution.get_execution_time())
+            + "s"
+        << std::endl;
+    os << "Solutions found       : " << solution.get_records().size() << std::endl;
+    os << "Constraints tested    : " << solution.get_constraint_count() << std::endl;
+    os << "Nodes made            : " << solution.get_node_count();
+}
+
+void os_long(ostream &os, const csp::solution &solution)
+{
+    std::size_t solution_number = 0;
+    for (const auto &record:solution.get_records())
+    {
+        std::string text;
+        for (const auto &value:record)
+        {
+            text += "{" + std::to_string(value) + "}";
+        }
+        os
+            << "Solution #"
+            << std::setfill('0')
+            << std::setw(3)
+            << std::to_string(++solution_number)
+            << " : "
+            << text
+            << std::endl;
+    }
+}
+
+ostream &operator<<(ostream &os, const csp::solution &solution)
+{
+    os_short(os, solution);
+    os_long(os << std::endl, solution);
+    return os;
+}
+
 std::string tellHistory(const std::vector<csp::record> &history, std::size_t explore)
 {
     std::stringstream os;
@@ -130,20 +176,18 @@ std::string tellHistory(const std::vector<csp::record> &history, std::size_t exp
             << "History at index "
             << std::distance(history.rend(), milestone)
             << "  :"
-            << edit(history.rbegin(), milestone)
-            << endl;
+            << edit(history.rbegin(), milestone) << std::endl;
     }
     else
     {
-        os << "History : " << edit(history.rbegin(), history.rend()) << endl;
+        os << "History : " << edit(history.rbegin(), history.rend()) << std::endl;
     }
 
     return os.str();
 }
 
 string edit_fn(variable_vector::const_iterator first,
-               variable_vector::const_iterator second,
-               std::function<string(const csp::csp_variable&)> fn)
+               variable_vector::const_iterator second, std::function<string(const csp::csp_variable &)> fn)
 {
     std::stringstream os;
     os << "{size:" << std::to_string(std::distance(first, second)) << ",values:[";
@@ -160,6 +204,7 @@ string edit_fn(variable_vector::const_iterator first,
     return os.str();
 }
 
-string edit(const const_iter_v & variable){
-    return  edit(**variable);
+string edit(const const_iter_v &variable)
+{
+    return edit(**variable);
 }

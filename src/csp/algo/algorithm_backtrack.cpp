@@ -8,9 +8,9 @@
 #include "../../ostream.h"
 #include "algorithm_backtrack.h"
 
-std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(variable_vector &variables,
-                                                               const constraint_vector &constraints,
-                                                               heuristic heuristic) const
+csp::solution csp::algorithm_backtrack::run(variable_vector &variables,
+                                            const constraint_vector &constraints,
+                                            heuristic heuristic) const
 {
     for (auto &i:variables)
     {
@@ -18,10 +18,12 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(variable_vector &
     }
 
     auto it_variable = variables.begin();
-    std::vector<std::vector<size_t>> solutions;
 
+    csp::solution tracker = solution(variables.size(), *this, heuristic);
+    tracker.start_chrono();
     while (true)
     {
+        tracker.inc_node_count();
         auto it = get_lowest_variable(it_variable, variables.end(), heuristic);
         if (it_variable != it)
         {
@@ -55,6 +57,7 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(variable_vector &
         bool met_error = false;
         for (const auto &constraint : constraints)
         {
+            tracker.inc_constraint_count();
             if (constraint->is_valuated() && !constraint->is_satisfied())
             {
                 met_error = true;
@@ -72,7 +75,7 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(variable_vector &
         it_variable = std::next(it_variable, 1);
         if (it_variable == variables.end())
         {
-            record_solution(solutions, variables);
+            tracker.add_record(variables);
             if (stop_at_first_result)
             {
                 break;
@@ -81,8 +84,8 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(variable_vector &
             (*it_variable)->restrict_first();
         }
     }
-
-    return solutions;
+    tracker.stop_chrono();
+    return std::move(tracker);
 }
 
 csp::algorithm_backtrack::algorithm_backtrack(bool stop_at_first_result) : algorithm(std::string("Backtrack"),

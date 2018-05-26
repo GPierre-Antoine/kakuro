@@ -9,6 +9,6 @@
 
 #include "forward.h"
 
-typedef std::function<long(const csp_variable_ptr &)> heuristic;
+typedef std::function<long(const csp_variable_ptr &)> heuristic_f;
 
 #endif //KAKURO_TYPEDEFS_H

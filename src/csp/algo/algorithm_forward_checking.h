@@ -7,6 +7,7 @@
 
 
 #include "../algorithm.h"
+#include "../heuristic.h"
 
 namespace csp
 {
@@ -14,7 +15,9 @@ namespace csp
     {
     public:
         explicit algorithm_forward_checking(bool stop_at_first_result);
-        std::vector<std::vector<size_t>> run(variable_vector &variables, const constraint_vector &constraints, heuristic heuristic) const override ;
+        solution run(variable_vector &variables,
+                     const constraint_vector &constraints,
+                     heuristic heuristic) const override;
     };
 }
 

@@ -42,8 +42,7 @@ public:
 
     void run_algorithm(const csp::algorithm &algo,
                        variable_vector &variables,
-                       const constraint_vector &constraints,
-                       heuristic heuristic);
+                       const constraint_vector &constraints, csp::heuristic heuristic);
 
 };
 

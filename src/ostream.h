@@ -11,8 +11,6 @@
 #include <sstream>
 #include "typedefs.h"
 
-using std::cout;
-using std::endl;
 using std::ostream;
 using std::vector;
 using std::string;
@@ -23,9 +21,12 @@ namespace csp
     class algorithm;
     class csp_constraint;
     class record;
+    class solution;
+    class heuristic;
 }
 
 string edit(const const_iter_v &var);
+string edit(const csp::heuristic &var);
 string edit(const csp::csp_variable &var);
 string edit_value_v(const csp::csp_variable &var);
 string edit_domain(const csp::csp_variable &var);
@@ -92,6 +93,7 @@ ostream &operator<<(ostream &os, const csp::csp_variable &var);
 ostream &operator<<(ostream &os, const csp_variable_ptr &var);
 ostream &operator<<(ostream &os, const csp::algorithm &var);
 ostream &operator<<(ostream &os, const csp::csp_constraint &constraint);
+ostream &operator<<(ostream &os, const csp::solution &solution);
 
 
 #endif //KAKURO_OSTREAM_H

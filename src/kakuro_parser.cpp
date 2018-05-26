@@ -1,5 +1,4 @@
 #include <iostream>
-#include <stdexcept>
 #include <fstream>
 #include <utility>
 #include <vector>
@@ -7,7 +6,6 @@
 #include <cassert>
 #include <algorithm>
 #include <iomanip>
-#include <ctime>
 
 #include "kakuro_parser.h"
 #include "Couleur.h"
@@ -244,16 +242,15 @@ void kakuro_parser::parse(char *nom_fichier)
         }
     }
 
-    heuristic base = [](const csp_variable_ptr &f)
-    { return f->get_id(); };
-
-    auto dom_deg_comp_natural = [](const csp_variable_ptr &f)
-    { return f->dom_deg(); };
+    csp::heuristic base("base", [](const csp_variable_ptr &f)
+    { return f->get_id(); });
+    csp::heuristic dom_deg("dom_deg", [](const csp_variable_ptr &f)
+    { return f->dom_deg(); });
 
     run_algorithm(csp::algorithm_backtrack(true), variables, constraints, base);
     run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, base);
-    run_algorithm(csp::algorithm_backtrack(true), variables, constraints, dom_deg_comp_natural);
-    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, dom_deg_comp_natural);
+    run_algorithm(csp::algorithm_backtrack(true), variables, constraints, dom_deg);
+    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, dom_deg);
 
 }
 
@@ -322,8 +319,7 @@ void kakuro_parser::constraint_sum(std::vector<csp_variable_ptr> &variables,
 
 void kakuro_parser::run_algorithm(const csp::algorithm &algo,
                                   variable_vector &variables,
-                                  const constraint_vector &constraints,
-                                  heuristic heuristic)
+                                  const constraint_vector &constraints, csp::heuristic heuristic)
 {
     for (auto &i:variables)
     {
@@ -331,35 +327,11 @@ void kakuro_parser::run_algorithm(const csp::algorithm &algo,
         i->reset();
     }
 
-    std::clock_t begin = std::clock();
-
     try
     {
-        auto affectations = algo.run(variables, constraints, std::move(heuristic));
-        std::clock_t end = std::clock();
+        auto solutions = algo.run(variables, constraints, heuristic);
+        cout << solutions << endl;
 
-        auto elasped_clock = (static_cast<std::size_t >(end - begin));
-
-        cout << "Ran algorithm " << edit(algo) << " in " << elasped_clock << " clocks" << endl;
-        cout << "Affectations found : " << affectations.size() << endl;
-        auto solution_number = 0u;
-        for (const auto &solution:affectations)
-        {
-
-            std::string text;
-            for (const auto &value:solution)
-            {
-                text += "{" + std::to_string(value) + "}";
-            }
-            cout
-                << "Solution #"
-                << std::setfill('0')
-                << std::setw(3)
-                << std::to_string(++solution_number)
-                << " : "
-                << text
-                << endl;
-        }
     } catch (std::runtime_error & error){
         throw std::runtime_error(std::string(error.what()) + " in algorithm : " + edit(algo));
     }

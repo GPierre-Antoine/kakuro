@@ -98,20 +98,21 @@ csp::algorithm_forward_checking::algorithm_forward_checking(bool stop_at_first_r
 
 }
 
-std::vector<std::vector<size_t>> csp::algorithm_forward_checking::run(variable_vector &variables,
-                                                     const constraint_vector &constraints,
-                                                     heuristic heuristic) const
+csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
+                                                   const constraint_vector &constraints,
+                                                   heuristic heuristic) const
 {
     std::vector<std::vector<size_t>> solutions;
     record_vector history;
     history.reserve(1000);
     auto it_variable = variables.begin();
 
-    std::string cmp1;
-    std::string cmp2;
+    csp::solution tracker = solution(variables.size(), *this, heuristic);
 
+    tracker.start_chrono();
     while (true)
     {
+        tracker.inc_node_count();
         //state is clear at the begining
 
         //test application for development purposes
@@ -123,7 +124,7 @@ std::vector<std::vector<size_t>> csp::algorithm_forward_checking::run(variable_v
         if (it_variable == variables.end())
         {
             //found solution
-            record_solution(solutions, variables);
+            tracker.add_record(variables);
 
 
             if (stop_at_first_result)
@@ -154,6 +155,7 @@ std::vector<std::vector<size_t>> csp::algorithm_forward_checking::run(variable_v
                     auto variable = i->get_last_unvaluated_variable();
                     auto domain_size_before_constraint = variable->get_available_size();
                     i->run_fc();
+                    tracker.inc_constraint_count();
                     auto domain_size_after_constraint = variable->get_available_size();
                     auto stack = static_cast<long>(domain_size_before_constraint - domain_size_after_constraint);
                     while (stack-- > 0)
@@ -190,6 +192,7 @@ std::vector<std::vector<size_t>> csp::algorithm_forward_checking::run(variable_v
         //now clear from error, go to next variable
         it_variable = std::next(it_variable);
     }
-    return solutions;
+    tracker.stop_chrono();
+    return std::move(tracker);
 }
 
