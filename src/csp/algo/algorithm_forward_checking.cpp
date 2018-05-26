@@ -140,8 +140,7 @@ csp::algorithm_forward_checking::algorithm_forward_checking(bool find_all_result
 
 }
 
-csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
-                                                   const constraint_vector &constraints,
+csp::solution csp::algorithm_forward_checking::run(variable_vector &variables, constraint_vector &constraints,
                                                    heuristic heuristic) const
 {
     std::vector<std::vector<size_t>> solutions;

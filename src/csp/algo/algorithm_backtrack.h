@@ -13,8 +13,7 @@ namespace csp
     class algorithm_backtrack : public algorithm
     {
     public:
-        solution run(variable_vector &variables,
-                     const constraint_vector &constraints,
+        solution run(variable_vector &variables, constraint_vector &constraints,
                      heuristic heuristic) const override;
         explicit algorithm_backtrack(bool find_all_results = true);
     };

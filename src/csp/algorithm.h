@@ -25,8 +25,7 @@ namespace csp
     public:
         const std::string name;
         const bool stop_at_first_result;
-        virtual solution run(variable_vector &variables,
-                             const constraint_vector &constraints,
+        virtual solution run(variable_vector &variables, constraint_vector &constraints,
                              heuristic heuristic) const =0;
         explicit algorithm(std::string name, bool stop_at_first_result = true);
         iter_v find_lower_value_variable(iter_v begin, iter_v end, heuristic_f h) const;

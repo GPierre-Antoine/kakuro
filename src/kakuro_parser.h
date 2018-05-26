@@ -41,8 +41,7 @@ public:
                         std::size_t arite, std::size_t sum);
 
     void run_algorithm(const csp::algorithm &algo,
-                       variable_vector &variables,
-                       const constraint_vector &constraints, csp::heuristic heuristic);
+                       variable_vector &variables, constraint_vector &constraints, csp::heuristic heuristic);
 
 };
 

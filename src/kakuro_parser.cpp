@@ -310,8 +310,7 @@ void kakuro_parser::constraint_sum(std::vector<csp_variable_ptr> &variables,
 }
 
 void kakuro_parser::run_algorithm(const csp::algorithm &algo,
-                                  variable_vector &variables,
-                                  const constraint_vector &constraints,
+                                  variable_vector &variables, constraint_vector &constraints,
                                   csp::heuristic heuristic)
 {
     for (auto &i:variables)

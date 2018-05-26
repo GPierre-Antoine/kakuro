@@ -15,8 +15,7 @@ namespace csp
     {
     public:
         explicit algorithm_forward_checking(bool find_all_results);
-        solution run(variable_vector &variables,
-                     const constraint_vector &constraints,
+        solution run(variable_vector &variables, constraint_vector &constraints,
                      heuristic heuristic) const override;
     };
 }

@@ -8,8 +8,7 @@
 #include "../../ostream.h"
 #include "algorithm_backtrack.h"
 
-csp::solution csp::algorithm_backtrack::run(variable_vector &variables,
-                                            const constraint_vector &constraints,
+csp::solution csp::algorithm_backtrack::run(variable_vector &variables, constraint_vector &constraints,
                                             heuristic heuristic) const
 {
     for (auto &i:variables)
