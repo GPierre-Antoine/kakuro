@@ -88,8 +88,8 @@ csp::solution csp::algorithm_backtrack::run(variable_vector &variables,
     return std::move(tracker);
 }
 
-csp::algorithm_backtrack::algorithm_backtrack(bool stop_at_first_result) : algorithm(std::string("Backtrack"),
-                                                                                     stop_at_first_result)
+csp::algorithm_backtrack::algorithm_backtrack(bool find_all_results) : algorithm(std::string("Backtrack"),
+                                                                                 find_all_results)
 {
 
 }

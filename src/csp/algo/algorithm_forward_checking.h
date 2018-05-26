@@ -14,7 +14,7 @@ namespace csp
     class algorithm_forward_checking : public algorithm
     {
     public:
-        explicit algorithm_forward_checking(bool stop_at_first_result);
+        explicit algorithm_forward_checking(bool find_all_results);
         solution run(variable_vector &variables,
                      const constraint_vector &constraints,
                      heuristic heuristic) const override;

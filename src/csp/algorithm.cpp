@@ -6,7 +6,8 @@
 #include "algorithm.h"
 #include "../ostream.h"
 
-csp::algorithm::algorithm(std::string name, bool stop_at_first_result) : name(std::move(name)), stop_at_first_result(stop_at_first_result)
+csp::algorithm::algorithm(std::string name, bool stop_at_first_result)
+    : name(std::move(name)), stop_at_first_result(!stop_at_first_result)
 {
 
 }

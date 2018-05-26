@@ -93,7 +93,8 @@ bool resolve_error_unfixed(variable_vector::const_iterator begin,
     }
 }
 
-csp::algorithm_forward_checking::algorithm_forward_checking(bool stop_at_first_result) : algorithm(std::string("Forward Checking"), stop_at_first_result)
+csp::algorithm_forward_checking::algorithm_forward_checking(bool find_all_results) : algorithm(std::string(
+    "Forward Checking"), find_all_results)
 {
 
 }
