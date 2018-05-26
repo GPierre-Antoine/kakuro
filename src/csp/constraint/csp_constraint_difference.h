@@ -15,7 +15,7 @@ namespace csp
     protected:
         csp_variable_ptr run_fc_child() const override;
     public:
-        explicit csp_constraint_difference(std::vector<csp_variable_ptr> &vector);
+        explicit csp_constraint_difference(std::size_t id);
         std::string edit() const override;
         bool run_constraint() const override;
     };

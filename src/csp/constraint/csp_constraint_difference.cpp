@@ -4,13 +4,8 @@
 
 #include "csp_constraint_difference.h"
 
-csp::csp_constraint_difference::csp_constraint_difference(std::vector<csp_variable_ptr> &vector) :
-        csp_constraint(vector)
+csp::csp_constraint_difference::csp_constraint_difference(std::size_t id) : csp_constraint(id)
 {
-    if (associated_variables.size() != 2)
-    {
-        throw std::runtime_error("Not wrong number of variables");
-    }
 }
 
 bool csp::csp_constraint_difference::run_constraint() const

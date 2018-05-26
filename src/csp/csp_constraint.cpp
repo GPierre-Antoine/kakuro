@@ -17,8 +17,7 @@ bool csp::csp_constraint::is_valuated() const
     return true;
 }
 
-csp::csp_constraint::csp_constraint(std::vector<csp_variable_ptr> &vector) : associated_variables(
-    vector)
+csp::csp_constraint::csp_constraint(std::size_t id) : id(id)
 {
 
 }
@@ -71,5 +70,9 @@ std::vector<csp_variable_ptr>::const_iterator csp::csp_constraint::cbegin() cons
 std::vector<csp_variable_ptr>::const_iterator csp::csp_constraint::cend() const
 {
     return associated_variables.cend();
+}
+void csp::csp_constraint::add_variable(csp_variable_ptr variable)
+{
+    associated_variables.push_back(variable);
 }
 

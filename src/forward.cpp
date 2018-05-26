@@ -11,9 +11,14 @@
 csp_variable_ptr make_yield_variable(std::size_t var){
     return std::make_shared<csp::csp_variable>(var);
 }
-csp_constraint_ptr make_yield_c_sum(std::vector<csp_variable_ptr> & variables, size_t sum){
-    return std::make_shared<csp::csp_constraint_sum>(variables,sum);
+
+std::size_t counter = 0;
+
+csp_constraint_ptr make_yield_c_sum(size_t sum)
+{
+    return std::make_shared<csp::csp_constraint_sum>(counter++, sum);
 }
-csp_constraint_ptr make_yield_c_diff(std::vector<csp_variable_ptr> & variables){
-    return std::make_shared<csp::csp_constraint_difference>(variables);
+csp_constraint_ptr make_yield_c_diff()
+{
+    return std::make_shared<csp::csp_constraint_difference>(counter++);
 }

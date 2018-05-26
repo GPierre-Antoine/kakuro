@@ -6,8 +6,7 @@
 
 #include "csp_constraint_sum.h"
 
-csp::csp_constraint_sum::csp_constraint_sum(std::vector<csp_variable_ptr> & variables, std::size_t sum)
-    : csp_constraint(variables), sum(sum)
+csp::csp_constraint_sum::csp_constraint_sum(std::size_t id, std::size_t sum) : csp_constraint(id), sum(sum)
 {
 
 }

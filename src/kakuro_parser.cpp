@@ -268,8 +268,13 @@ void kakuro_parser::parse(char *nom_fichier)
  */
 void kakuro_parser::make_variable(std::vector<csp_variable_ptr> &variables, std::size_t num)
 {
-    cout << "Variable " << num << endl;
     variables.push_back(make_yield_variable(num));
+}
+
+void bind(csp_variable_ptr &v, csp_constraint_ptr &c)
+{
+    v->add_constraint(c);
+    c->add_variable(v);
 }
 
 /**
@@ -281,15 +286,9 @@ void kakuro_parser::constraint_difference(std::vector<csp_variable_ptr> &variabl
                                           std::size_t var1,
                                           std::size_t var2)
 {
-    cout << "Contrainte binaire de difference entre " << var1 << " et " << var2 << endl;
-    auto v1 = variables.at(var1);
-
-    auto v2 = variables.at(var2);
-
-    std::vector<csp_variable_ptr> holder{v1, v2};
-    constraints.emplace_back(make_yield_c_diff(holder));
-    v1->add_constraint(constraints.back());
-    v2->add_constraint(constraints.back());
+    constraints.emplace_back(make_yield_c_diff());
+    bind(variables.at(var1), constraints.back());
+    bind(variables.at(var2), constraints.back());
 }
 
 /**
@@ -302,28 +301,18 @@ void kakuro_parser::constraint_sum(std::vector<csp_variable_ptr> &variables,
                                    std::size_t arite,
                                    std::size_t sum)
 {
-    std::string text;
-    std::vector<csp_variable_ptr> holder;
-    holder.reserve(arite);
-    for (std::size_t index = 0; index < arite; index++)
-    {
-        auto var = variables.at(portee[index]);
-        holder.push_back(var);
-        text += " " + std::to_string(portee[index]);
-    }
-    constraints.emplace_back(make_yield_c_sum(holder, sum));
-    for (std::size_t index = 0; index < arite; index++)
-    {
-        auto var = variables.at(portee[index]);
-        var->add_constraint(constraints.back());
-    }
+    constraints.emplace_back(make_yield_c_sum(sum));
 
-    cout << "Contrainte n-aire de somme portant sur" << text << " et de valeur " << std::to_string(sum) << endl;
+    for (std::size_t index = 0; index < arite; index++)
+    {
+        bind(variables.at(portee[index]), constraints.back());
+    }
 }
 
 void kakuro_parser::run_algorithm(const csp::algorithm &algo,
                                   variable_vector &variables,
-                                  const constraint_vector &constraints, csp::heuristic heuristic)
+                                  const constraint_vector &constraints,
+                                  csp::heuristic heuristic)
 {
     for (auto &i:variables)
     {
@@ -336,7 +325,9 @@ void kakuro_parser::run_algorithm(const csp::algorithm &algo,
         auto solutions = algo.run(variables, constraints, heuristic);
         cout << solutions << endl;
 
-    } catch (std::runtime_error & error){
+    }
+    catch (std::runtime_error &error)
+    {
         throw std::runtime_error(std::string(error.what()) + " in algorithm : " + edit(algo));
     }
 }
