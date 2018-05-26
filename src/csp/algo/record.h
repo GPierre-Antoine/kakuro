@@ -26,12 +26,13 @@ namespace csp
         {
             using std::swap;
             swap(first.type, second.type);
-            swap(first.variable,second.variable);
+            swap(first.variable, second.variable);
         }
         record(record_type type, csp_variable_ptr variable, std::size_t timestamp, std::size_t count);
-        record(record && r) noexcept ;
-        record&operator=(const record& r) = default;
-        bool is_manual () const;
+        record(const record &) = delete;
+        record(record &&r) noexcept;
+
+        bool is_manual() const;
         const csp_variable_ptr get_variable() const;
         void forget();
         ~record();

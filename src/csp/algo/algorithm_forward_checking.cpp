@@ -33,20 +33,24 @@
 
 /**
  *
- * @param f
+ * @param var
  * @param history
  * @param timestamp
  * @param type
  */
-void restrict_automatic(csp_variable_ptr &f, record_vector &history, std::size_t timestamp, std::size_t count)
+void restrict_automatic(csp_variable_ptr &var,
+                        csp_constraint_ptr c,
+                        record_vector &history,
+                        std::size_t timestamp,
+                        std::size_t count)
 {
-    history.emplace_back(csp::record(record_type::automatic, f, timestamp, count));
+    history.emplace(std::make_pair(c, csp::record(record_type::automatic, var, timestamp, count)));
 }
 
 void restrict_manual(csp_variable_ptr &f, record_vector &history, std::size_t timestamp)
 {
     f->restrict_first();
-    history.emplace_back(csp::record(record_type::manual, f, timestamp, 1));
+    history.emplace(std::make_pair(nullptr, csp::record(record_type::manual, f, timestamp, 1)));
 }
 
 inline bool range_has_value(std::vector<std::size_t>::const_iterator begin,
@@ -58,9 +62,10 @@ inline bool range_has_value(std::vector<std::size_t>::const_iterator begin,
 
 void rollback_unfixed_variables(const std::vector<std::size_t> &delete_values, record_vector &history)
 {
-    while (!history.empty() && range_has_value(delete_values.begin(), delete_values.end(), history.back().get_variable()->get_id()))
+    while (!history.empty()
+        && range_has_value(delete_values.begin(), delete_values.end(), history.top().second.get_variable()->get_id()))
     {
-        history.pop_back();
+        history.pop();
     }
 }
 
@@ -81,7 +86,7 @@ bool resolve_error_unfixed(variable_vector::const_iterator begin,
         restrict_manual(*it_variable, history, (*it_variable)->get_id());
         if (!(*it_variable)->has_empty_domain())
         {
-//            assert_variables_in_range_noempty(begin, end);
+            //            assert_variables_in_range_noempty(begin, end);
             return true;
         }
         if (it_variable == begin)
@@ -105,7 +110,6 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
 {
     std::vector<std::vector<size_t>> solutions;
     record_vector history;
-    history.reserve(1000);
     auto it_variable = variables.begin();
 
     csp::solution tracker = solution(variables.size(), *this, heuristic);
@@ -141,9 +145,11 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
         else
         {
             //sort with heuristic
-            auto it = get_lowest_variable(it_variable,variables.end(),heuristic);
-            if (it_variable!=it)
-                std::iter_swap(it_variable,it);
+            auto it = get_lowest_variable(it_variable, variables.end(), heuristic);
+            if (it_variable != it)
+            {
+                std::iter_swap(it_variable, it);
+            }
 
             //assign new value
             (*it_variable)->assign_first_element_as_value();
@@ -159,7 +165,7 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
                     tracker.inc_constraint_count();
                     auto domain_size_after_constraint = variable->get_available_size();
                     std::size_t stack = domain_size_before_constraint - domain_size_after_constraint;
-                    restrict_automatic(variable, history, (*it_variable)->get_id(), stack);
+                    restrict_automatic(variable, i, history, (*it_variable)->get_id(), stack);
                     if (!domain_size_after_constraint)
                     {
                         met_error = true;

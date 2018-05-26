@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <vector>
+#include <stack>
 #include <functional>
 
 namespace csp
@@ -25,7 +26,7 @@ typedef std::shared_ptr<csp::csp_constraint> csp_constraint_ptr;
 csp_constraint_ptr make_yield_c_sum(std::size_t);
 csp_constraint_ptr make_yield_c_diff();
 
-typedef std::stack<csp::record> record_vector;
+typedef std::stack<std::pair<csp_constraint_ptr, csp::record>> record_vector;
 
 template<typename iter_t, class T, class type>
 T reduce(iter_t begin, iter_t end, T init, std::function<T (T,type)> f)
