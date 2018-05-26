@@ -4,14 +4,19 @@
 
 
 #include "record.h"
-#include <utility>
 #include "../../ostream.h"
 
-csp::record::record(record_type type, csp_variable_ptr variable, std::size_t timestamp)
-        : type(type), variable(std::move(variable)), timestamp(timestamp)
+csp::record::record(record_type type, csp_variable_ptr variable, std::size_t timestamp, std::size_t count)
+    : type(type), variable(std::move(variable)), timestamp(timestamp), count(count)
 {
 
 }
+
+csp::record::record(csp::record &&other) noexcept : timestamp(other.timestamp), count(other.count) // NOLINT
+{
+    swap(*this, other);
+}
+
 
 bool csp::record::is_manual() const
 {
@@ -22,7 +27,7 @@ void csp::record::forget()
 {
     if (variable)
     {
-        variable->release_last();
+        variable->release_last(count);
     }
 }
 
@@ -35,14 +40,3 @@ const csp_variable_ptr csp::record::get_variable() const
 {
     return variable;
 }
-
-bool csp::record::is_same_variable(const csp::csp_variable &other) const
-{
-    return *variable == other;
-}
-
-csp::record::record(csp::record &&other) noexcept : timestamp(other.timestamp) // NOLINT
-{
-    swap(*this, other);
-}
-

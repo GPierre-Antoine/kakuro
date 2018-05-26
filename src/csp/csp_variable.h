@@ -52,7 +52,7 @@ namespace csp
         void restrict_not(const std::size_t &index);
 
         void restrict_first();
-        void release_last();
+        void release_last(std::size_t);
         void release_all();
         void add_constraint(csp_constraint_ptr);
         std::size_t get_constraint_count() const;

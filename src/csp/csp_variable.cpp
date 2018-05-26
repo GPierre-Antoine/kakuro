@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <numeric>
-#include <stdexcept>
 #include <iterator>
 #include <utility>
 #include <algorithm>
@@ -12,8 +11,6 @@
 #include "csp_constraint.h"
 #include <chrono>
 #include <thread>
-#include <cassert>
-#include "algo/record.h"
 
 #include "../ostream.h"
 
@@ -55,13 +52,13 @@ void csp::csp_variable::restrict_first()
     unvaluate();
 }
 
-void csp::csp_variable::release_last()
+void csp::csp_variable::release_last(std::size_t s)
 {
     if (domain_start == 0)
     {
         return;
     }
-    domain_start -= 1;
+    domain_start -= s;
     valuated=false;
 }
 

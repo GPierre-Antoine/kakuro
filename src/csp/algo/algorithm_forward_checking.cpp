@@ -5,31 +5,31 @@
 #include "algorithm_forward_checking.h"
 #include "../../ostream.h"
 
-#define lf __FILE__ << ":" << std::setw(3) << __LINE__ << " # "
+//#define lf __FILE__ << ":" << std::setw(3) << __LINE__ << " # "
 
-void assert_variables_in_range_noempty(const_iter_v begin, const_iter_v end)
-{
-    for (; begin != end; std::advance(begin, 1))
-    {
-        if ((*begin)->has_empty_domain())
-        {
-            std::stringstream os;
-            os << std::setfill('0') << lf << "variable " << edit(**begin) << " has empty domain";
-            throw std::runtime_error(os.str());
-        }
-    }
-}
+//void assert_variables_in_range_noempty(const_iter_v begin, const_iter_v end)
+//{
+//    for (; begin != end; std::advance(begin, 1))
+//    {
+//        if ((*begin)->has_empty_domain())
+//        {
+//            std::stringstream os;
+//            os << std::setfill('0') << lf << "variable " << edit(**begin) << " has empty domain";
+//            throw std::runtime_error(os.str());
+//        }
+//    }
+//}
 
-void assert_variables_in_range_assignated(const_iter_v begin, const_iter_v end)
-{
-    for (; begin != end; std::advance(begin, 1))
-    {
-        if (!(*begin)->is_valuated())
-        {
-            throw std::runtime_error(edit(**begin) + " isn't valuated");
-        }
-    }
-}
+//void assert_variables_in_range_assignated(const_iter_v begin, const_iter_v end)
+//{
+//    for (; begin != end; std::advance(begin, 1))
+//    {
+//        if (!(*begin)->is_valuated())
+//        {
+//            throw std::runtime_error(edit(**begin) + " isn't valuated");
+//        }
+//    }
+//}
 
 /**
  *
@@ -38,15 +38,15 @@ void assert_variables_in_range_assignated(const_iter_v begin, const_iter_v end)
  * @param timestamp
  * @param type
  */
-void restrict_automatic(csp_variable_ptr &f, record_vector &history, std::size_t timestamp)
+void restrict_automatic(csp_variable_ptr &f, record_vector &history, std::size_t timestamp, std::size_t count)
 {
-    history.emplace_back(csp::record(record_type::automatic, f, timestamp));
+    history.emplace_back(csp::record(record_type::automatic, f, timestamp, count));
 }
 
 void restrict_manual(csp_variable_ptr &f, record_vector &history, std::size_t timestamp)
 {
     f->restrict_first();
-    history.emplace_back(csp::record(record_type::manual, f, timestamp));
+    history.emplace_back(csp::record(record_type::manual, f, timestamp, 1));
 }
 
 inline bool range_has_value(std::vector<std::size_t>::const_iterator begin,
@@ -158,12 +158,8 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
                     i->run_fc();
                     tracker.inc_constraint_count();
                     auto domain_size_after_constraint = variable->get_available_size();
-                    auto stack = static_cast<long>(domain_size_before_constraint - domain_size_after_constraint);
-                    while (stack-- > 0)
-                    {
-                        //record all new mecanisme under current variable id
-                        restrict_automatic(variable, history, (*it_variable)->get_id());
-                    }
+                    std::size_t stack = domain_size_before_constraint - domain_size_after_constraint;
+                    restrict_automatic(variable, history, (*it_variable)->get_id(), stack);
                     if (!domain_size_after_constraint)
                     {
                         met_error = true;
