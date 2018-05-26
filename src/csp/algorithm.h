@@ -27,6 +27,7 @@ namespace csp
         const bool stop_at_first_result;
         virtual std::vector<std::vector<size_t>> run(variable_vector &variables, const constraint_vector &constraints, heuristic heuristic) const=0;
         explicit algorithm(std::string name, bool stop_at_first_result = true);
+        iter_v get_lowest_variable(iter_v begin, iter_v end, heuristic h) const;
     };
 }
 

@@ -22,7 +22,11 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(variable_vector &
 
     while (true)
     {
-        std::sort(it_variable,variables.end(),heuristic);
+        auto it = get_lowest_variable(it_variable, variables.end(), heuristic);
+        if (it_variable != it)
+        {
+            std::iter_swap(it_variable, it);
+        }
 
         if (it_variable == variables.end())
         {
@@ -70,7 +74,9 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(variable_vector &
         {
             record_solution(solutions, variables);
             if (stop_at_first_result)
+            {
                 break;
+            }
             it_variable = std::prev(it_variable, 1);
             (*it_variable)->restrict_first();
         }
@@ -79,7 +85,8 @@ std::vector<std::vector<size_t>> csp::algorithm_backtrack::run(variable_vector &
     return solutions;
 }
 
-csp::algorithm_backtrack::algorithm_backtrack(bool stop_at_first_result) : algorithm(std::string("Backtrack"),stop_at_first_result)
+csp::algorithm_backtrack::algorithm_backtrack(bool stop_at_first_result) : algorithm(std::string("Backtrack"),
+                                                                                     stop_at_first_result)
 {
 
 }

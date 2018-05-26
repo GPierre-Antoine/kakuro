@@ -81,7 +81,7 @@ bool resolve_error_unfixed(variable_vector::const_iterator begin,
         restrict_manual(*it_variable, history, (*it_variable)->get_id());
         if (!(*it_variable)->has_empty_domain())
         {
-            assert_variables_in_range_noempty(begin, end);
+//            assert_variables_in_range_noempty(begin, end);
             return true;
         }
         if (it_variable == begin)
@@ -105,8 +105,10 @@ std::vector<std::vector<size_t>> csp::algo_forward_checking::run(variable_vector
     std::vector<std::vector<size_t>> solutions;
     record_vector history;
     history.reserve(1000);
-
     auto it_variable = variables.begin();
+
+    std::string cmp1;
+    std::string cmp2;
 
     while (true)
     {
@@ -114,7 +116,6 @@ std::vector<std::vector<size_t>> csp::algo_forward_checking::run(variable_vector
 
         //test application for development purposes
         //assert_variables_in_range_assignated(variables.begin(), it_variable);
-
 
         //check error
         bool met_error = false;
@@ -138,7 +139,9 @@ std::vector<std::vector<size_t>> csp::algo_forward_checking::run(variable_vector
         else
         {
             //sort with heuristic
-            std::sort(it_variable, variables.end(), heuristic);
+            auto it = get_lowest_variable(it_variable,variables.end(),heuristic);
+            if (it_variable!=it)
+                std::iter_swap(it_variable,it);
 
             //assign new value
             (*it_variable)->assign_first_element_as_value();
