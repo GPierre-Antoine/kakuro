@@ -15,7 +15,7 @@
 #include "csp/algo/algorithm_backtrack.h"
 #include "csp/constraint/csp_constraint_sum.h"
 #include "csp/constraint/csp_constraint_difference.h"
-#include "csp/algo/algo_forward_checking.h"
+#include "csp/algo/algorithm_forward_checking.h"
 #include "ostream.h"
 
 using std::cerr;
@@ -251,9 +251,9 @@ void kakuro_parser::parse(char *nom_fichier)
     { return f->dom_deg(); };
 
     run_algorithm(csp::algorithm_backtrack(true), variables, constraints, base);
-    run_algorithm(csp::algo_forward_checking(true), variables, constraints, base);
+    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, base);
     run_algorithm(csp::algorithm_backtrack(true), variables, constraints, dom_deg_comp_natural);
-    run_algorithm(csp::algo_forward_checking(true), variables, constraints, dom_deg_comp_natural);
+    run_algorithm(csp::algorithm_forward_checking(true), variables, constraints, dom_deg_comp_natural);
 
 }
 

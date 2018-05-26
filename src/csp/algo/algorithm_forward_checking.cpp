@@ -2,7 +2,7 @@
 // Created by pierreantoine on 24/05/18.
 //
 
-#include "algo_forward_checking.h"
+#include "algorithm_forward_checking.h"
 #include "../../ostream.h"
 
 #define lf __FILE__ << ":" << std::setw(3) << __LINE__ << " # "
@@ -93,12 +93,12 @@ bool resolve_error_unfixed(variable_vector::const_iterator begin,
     }
 }
 
-csp::algo_forward_checking::algo_forward_checking(bool stop_at_first_result) : algorithm(std::string("Forward Checking"), stop_at_first_result)
+csp::algorithm_forward_checking::algorithm_forward_checking(bool stop_at_first_result) : algorithm(std::string("Forward Checking"), stop_at_first_result)
 {
 
 }
 
-std::vector<std::vector<size_t>> csp::algo_forward_checking::run(variable_vector &variables,
+std::vector<std::vector<size_t>> csp::algorithm_forward_checking::run(variable_vector &variables,
                                                      const constraint_vector &constraints,
                                                      heuristic heuristic) const
 {
