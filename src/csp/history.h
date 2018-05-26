@@ -16,15 +16,22 @@ namespace csp
 
     class record;
 
-    typedef std::pair<std::size_t, record> couple;
+    typedef std::pair<csp_constraint_ptr, record> couple;
 
     class history
     {
-        std::stack<couple> record_track;
+        std::stack<couple> record_track{};
     public:
+        history() = default;
         history(const history &) = delete;
         void track(const csp_constraint_ptr &constraint, csp::record &&r);
-        void track(const constraint_vector::const_iterator &constraint, csp::record &&r);
+        bool empty();
+        void pop();
+        couple &top();
+        csp_constraint_ptr &get_constraint();
+        record &get_record();
+        const csp_variable_ptr get_variable();
+        bool has_constraint();
     };
 
 }

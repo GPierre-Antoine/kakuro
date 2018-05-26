@@ -4,6 +4,7 @@
 
 #include "algorithm_forward_checking.h"
 #include "../../ostream.h"
+#include "../history.h"
 
 //#define lf __FILE__ << ":" << std::setw(3) << __LINE__ << " # "
 
@@ -38,19 +39,15 @@
  * @param timestamp
  * @param type
  */
-void restrict_automatic(csp_variable_ptr &var,
-                        csp_constraint_ptr c,
-                        record_vector &history,
-                        std::size_t timestamp,
-                        std::size_t count)
+void restrict_automatic(csp_variable_ptr &var, csp_constraint_ptr c, csp::history &history, std::size_t count)
 {
-    history.emplace(std::make_pair(c, csp::record(record_type::automatic, var, timestamp, count)));
+    history.track(c, std::move(csp::record(record_type::automatic, var, var->get_id(), count)));
 }
 
-void restrict_manual(csp_variable_ptr &f, record_vector &history, std::size_t timestamp)
+void restrict_manual(csp_variable_ptr &f, csp::history &history, std::size_t timestamp)
 {
     f->restrict_first();
-    history.emplace(std::make_pair(nullptr, csp::record(record_type::manual, f, timestamp, 1)));
+    history.track(nullptr, std::move(csp::record(record_type::manual, f, timestamp, 1)));
 }
 
 inline bool range_has_value(std::vector<std::size_t>::const_iterator begin,
@@ -60,10 +57,10 @@ inline bool range_has_value(std::vector<std::size_t>::const_iterator begin,
     return std::find(begin, end, value) != end;
 }
 
-void rollback_unfixed_variables(const std::vector<std::size_t> &delete_values, record_vector &history)
+void rollback_unfixed_variables(const std::vector<std::size_t> &delete_values, csp::history &history)
 {
     while (!history.empty()
-        && range_has_value(delete_values.begin(), delete_values.end(), history.top().second.get_variable()->get_id()))
+        && range_has_value(delete_values.begin(), delete_values.end(), history.get_variable()->get_id()))
     {
         history.pop();
     }
@@ -71,8 +68,7 @@ void rollback_unfixed_variables(const std::vector<std::size_t> &delete_values, r
 
 bool resolve_error_unfixed(variable_vector::const_iterator begin,
                            variable_vector::iterator &it_variable,
-                           variable_vector::const_iterator end,
-                           record_vector &history)
+                           variable_vector::const_iterator end, csp::history &history)
 {
     std::vector<std::size_t> unfixed;
     unfixed.reserve(static_cast<std::size_t>(std::distance(begin, end)));
@@ -109,7 +105,7 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
                                                    heuristic heuristic) const
 {
     std::vector<std::vector<size_t>> solutions;
-    record_vector history;
+    csp::history history{};
     auto it_variable = variables.begin();
 
     csp::solution tracker = solution(variables.size(), *this, heuristic);
@@ -165,7 +161,7 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
                     tracker.inc_constraint_count();
                     auto domain_size_after_constraint = variable->get_available_size();
                     std::size_t stack = domain_size_before_constraint - domain_size_after_constraint;
-                    restrict_automatic(variable, i, history, (*it_variable)->get_id(), stack);
+                    restrict_automatic(variable, i, history, stack);
                     if (!domain_size_after_constraint)
                     {
                         met_error = true;
@@ -179,10 +175,7 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables,
         if (met_error)
         {
 
-            if (!resolve_error_unfixed(std::move(variables.cbegin()),
-                                       it_variable,
-                                       std::move(variables.cend()),
-                                       history))
+            if (!resolve_error_unfixed(variables.cbegin(), it_variable, variables.cend(), history))
             {
                 //if could not resolve error, exit
                 // <=> backtracked until first variable has empty domain

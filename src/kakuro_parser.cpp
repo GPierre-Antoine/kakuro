@@ -252,8 +252,8 @@ void kakuro_parser::parse(char *nom_fichier)
     const bool stop_after_first = true;
 
     run_algorithm(csp::algorithm_backtrack(stop_after_first), variables, constraints, base);
-    run_algorithm(csp::algorithm_forward_checking(stop_after_first), variables, constraints, base);
     run_algorithm(csp::algorithm_backtrack(stop_after_first), variables, constraints, dom_deg);
+    run_algorithm(csp::algorithm_forward_checking(stop_after_first), variables, constraints, base);
     run_algorithm(csp::algorithm_forward_checking(stop_after_first), variables, constraints, dom_deg);
 
 }
