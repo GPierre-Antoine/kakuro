@@ -13,9 +13,6 @@ using std::to_string;
 //constexpr const char *underline_start = "\033[4m";
 //constexpr const char *underline_stop  = "\033[0m";
 
-constexpr const char *underline_start = ">";
-constexpr const char *underline_stop = "<";
-
 string edit(const csp::csp_variable &var)
 {
     std::stringstream os;
