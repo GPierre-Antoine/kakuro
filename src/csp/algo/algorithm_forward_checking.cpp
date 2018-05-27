@@ -30,7 +30,10 @@ bool apply_constraint(const csp_constraint_ptr &constraint, csp::history &histor
     constraint->run_fc();
     auto domain_size_after_constraint = variable->get_available_size();
     std::size_t stack = domain_size_before_constraint - domain_size_after_constraint;
-    restrict_automatic(variable, constraint, history, stack);
+    if (stack)
+    {
+        restrict_automatic(variable, constraint, history, stack);
+    }
     return domain_size_after_constraint != 0;
 }
 
