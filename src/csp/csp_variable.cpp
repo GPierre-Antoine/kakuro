@@ -20,7 +20,7 @@ csp::csp_variable::csp_variable(const std::size_t &s) : id(s), domain_start(0), 
 
 double csp::csp_variable::dom_deg() const
 {
-    return static_cast<double>(get_available_size())/std::max(1ul,get_constraint_count());
+    return static_cast<double>(get_available_size()) / std::max(1ul, get_constraint_count());
 }
 
 std::size_t csp::csp_variable::get_id() const
@@ -34,7 +34,7 @@ std::size_t csp::csp_variable::get_value() const
     {
         throw std::runtime_error("Unvaluated variable " + std::to_string(get_id()) + " : " + edit(*this));
     }
-    return *(std::next(domain.begin(),domain_start));
+    return *(std::next(domain.begin(), domain_start));
 }
 
 bool csp::csp_variable::is_valuated() const
@@ -59,7 +59,7 @@ void csp::csp_variable::release_last(std::size_t s)
         return;
     }
     domain_start -= s;
-    valuated=false;
+    valuated = false;
 }
 
 typename domain_t::iterator csp::csp_variable::get_free_iterator(const std::size_t &index)
@@ -148,16 +148,27 @@ typename domain_t::const_iterator csp::csp_variable::cend() const
 
 void csp::csp_variable::reset()
 {
+    release_all();
     std::sort(domain.begin(), domain.end());
     unvaluate();
+    constraints.resize(constraint_size);
 }
 
 std::size_t csp::csp_variable::get_constraint_count() const
 {
-    return reduce<typename constraint_vector::const_iterator, std::size_t, csp_constraint_ptr>(constraints.cbegin(), constraints.cend(), 0u, [](unsigned i, const csp_constraint_ptr &constraint)
-    {
-        return i + !constraint->is_valuated();
-    });
+    const auto size = constraint_size;
+    return reduce<typename constraint_vector::const_iterator, std::size_t, csp_constraint_ptr>(constraints.cbegin(),
+                                                                                               constraints.cend(),
+                                                                                               0u,
+                                                                                               [size](unsigned i,
+                                                                                                      const csp_constraint_ptr &constraint)
+                                                                                               {
+                                                                                                   return i
+                                                                                                       + (constraint->id
+                                                                                                           <= size
+                                                                                                           && !constraint
+                                                                                                               ->is_valuated());
+                                                                                               });
 }
 
 void csp::csp_variable::unvaluate()
@@ -171,4 +182,8 @@ void csp::csp_variable::add_constraint(csp_constraint_ptr ptr)
 constraint_vector &csp::csp_variable::get_constraints()
 {
     return constraints;
+}
+void csp::csp_variable::save_state()
+{
+    constraint_size = constraints.size();
 }

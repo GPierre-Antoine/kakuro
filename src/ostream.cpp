@@ -109,7 +109,7 @@ ostream &operator<<(ostream &os, const csp::algorithm &var)
 
 ostream &operator<<(ostream &os, const csp::csp_variable &var)
 {
-    return os << edit(var);
+    return os << edit_domain(var);
 }
 
 ostream &operator<<(ostream &os, const csp_variable_ptr &var)

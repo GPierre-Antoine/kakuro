@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
         }
     }
     catch (std::runtime_error &error) {
-        cerr  << "Error : " << error.what() << endl;
+        cerr << "Error : \n" << error.what() << endl;
         return EXIT_FAILURE;
     }
 

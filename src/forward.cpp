@@ -7,6 +7,7 @@
 #include "csp/csp_constraint.h"
 #include "csp/constraint/csp_constraint_sum.h"
 #include "csp/constraint/csp_constraint_difference.h"
+#include "csp/constraint/csp_constraint_solution.h"
 
 csp_variable_ptr make_yield_variable(std::size_t var){
     return std::make_shared<csp::csp_variable>(var);
@@ -22,3 +23,9 @@ csp_constraint_ptr make_yield_c_diff()
 {
     return std::make_shared<csp::csp_constraint_difference>(counter++);
 }
+
+std::shared_ptr<csp::csp_constraint_solution> make_yield_c_solution()
+{
+    return std::make_shared<csp::csp_constraint_solution>(counter++);
+}
+

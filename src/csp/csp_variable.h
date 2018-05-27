@@ -27,8 +27,8 @@ namespace csp
 
         std::size_t domain_start;
         bool valuated;
-
         constraint_vector constraints;
+        std::size_t constraint_size = 0;
 
         typename domain_t::iterator get_free_iterator(const std::size_t &index);
     public:
@@ -61,6 +61,8 @@ namespace csp
         typename domain_t::const_iterator cbegin() const;
         typename domain_t::const_iterator cend() const;
         double dom_deg() const;
+
+        void save_state();
     };
 }
 

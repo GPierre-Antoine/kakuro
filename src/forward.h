@@ -14,6 +14,7 @@ namespace csp
 {
     class csp_variable;
     class csp_constraint;
+    class csp_constraint_solution;
     class record;
 }
 
@@ -25,6 +26,7 @@ typedef std::vector<csp_variable_ptr> variable_vector;
 typedef std::shared_ptr<csp::csp_constraint> csp_constraint_ptr;
 csp_constraint_ptr make_yield_c_sum(std::size_t);
 csp_constraint_ptr make_yield_c_diff();
+std::shared_ptr<csp::csp_constraint_solution> make_yield_c_solution();
 
 typedef std::stack<std::pair<csp_constraint_ptr, csp::record>> record_vector;
 

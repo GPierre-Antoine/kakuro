@@ -242,6 +242,11 @@ void kakuro_parser::parse(char *nom_fichier)
         }
     }
 
+    for (auto &i:variables)
+    {
+        i->save_state();
+    }
+
     csp::heuristic base("base", [](const csp_variable_ptr &f)
     { return f->get_id(); });
     csp::heuristic dom_deg("dom_deg", [](const csp_variable_ptr &f)
@@ -310,12 +315,12 @@ void kakuro_parser::constraint_sum(std::vector<csp_variable_ptr> &variables,
 }
 
 void kakuro_parser::run_algorithm(const csp::algorithm &algo,
-                                  variable_vector &variables, constraint_vector &constraints,
+                                  variable_vector &variables,
+                                  constraint_vector &constraints,
                                   csp::heuristic heuristic)
 {
     for (auto &i:variables)
     {
-        i->release_all();
         i->reset();
     }
 

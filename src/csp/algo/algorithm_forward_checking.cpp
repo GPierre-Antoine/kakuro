@@ -5,32 +5,7 @@
 #include "algorithm_forward_checking.h"
 #include "../../ostream.h"
 #include "../history.h"
-
-#define lf std::string(__FILE__) + ":" + std::to_string(__LINE__) + " # "
-
-//void assert_variables_in_range_noempty(const_iter_v begin, const_iter_v end)
-//{
-//    for (; begin != end; std::advance(begin, 1))
-//    {
-//        if ((*begin)->has_empty_domain())
-//        {
-//            std::stringstream os;
-//            os << std::setfill('0') << lf << "variable " << edit(**begin) << " has empty domain";
-//            throw std::runtime_error(os.str());
-//        }
-//    }
-//}
-
-//void assert_variables_in_range_assignated(const_iter_v begin, const_iter_v end)
-//{
-//    for (; begin != end; std::advance(begin, 1))
-//    {
-//        if (!(*begin)->is_valuated())
-//        {
-//            throw std::runtime_error(edit(**begin) + " isn't valuated");
-//        }
-//    }
-//}
+#include "../constraint/csp_constraint_solution.h"
 
 /**
  *
@@ -115,40 +90,7 @@ bool resolve_error_with_constraint(variable_vector &variables,
                                    variable_vector::iterator &it_variable,
                                    csp::history &history)
 {
-    auto begin = variables.begin();
-    auto end = variables.end();
-    //    std::cout << "\n" << lf << edit_fn(begin, end, edit_domain) << "\n";
-    std::vector<std::size_t> ids;
-    ids.reserve(variables.size());
-    ids.resize(static_cast<std::size_t>(std::distance(it_variable, end)));
-    std::transform(it_variable, end, ids.begin(), [](const csp_variable_ptr &var)
-    {
-        return var->get_id();
-    });
-
-    for (;; std::advance(it_variable, -1))
-    {
-        while (history
-            && ((history.has_constraint() && history.get_constraint()->has_a_empty_variable())
-                || (!history.has_constraint()
-                    && range_has_value(ids.begin(), ids.end(), history.get_variable()->get_id()))))
-        {
-            history.pop();
-        }
-
-        restrict_manual(*it_variable, history, (*it_variable)->get_id());
-        if (!(*it_variable)->has_empty_domain())
-        {
-            break;
-        }
-        if (it_variable == begin)
-        {
-            return false;
-        }
-        ids.push_back((*it_variable)->get_id());
-    }
-    //    std::cout << lf << edit_fn(begin, end, edit_domain) << "\n";
-    return true;
+    return false;
 }
 
 csp::algorithm_forward_checking::algorithm_forward_checking(bool find_all_results) : algorithm(std::string(
@@ -184,8 +126,18 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables, c
             {
                 break;
             }
+
+            //            std::shared_ptr<csp::csp_constraint_solution> solution = make_yield_c_solution();
+            //            solution->resize(variables.size());
+            //            for (auto&var:variables){
+            //                solution->add(var);
+            //            }
+
             //it variable now re-points toward a csp::csp_variable
             it_variable = std::prev(it_variable);
+
+            //            apply_constraint(solution,history);
+
             met_error = true;
             //treat current affectation as error, it will be rolled-back the same
         }
