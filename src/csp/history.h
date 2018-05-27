@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <utility>
 #include <stack>
+#include "algo/record.h"
 #include "../forward.h"
 
 namespace csp
