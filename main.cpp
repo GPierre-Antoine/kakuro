@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    kakuro_parser p(true);
+    kakuro_parser p(false);
 
     try {
         for (auto it = argv + 1; it < (argv + argc); ++it) {
