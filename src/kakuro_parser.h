@@ -11,7 +11,11 @@
 #include "csp/algorithm.h"
 
 struct kakuro_parser {
+private:
+    bool find_all_results;
 public:
+    explicit kakuro_parser(bool find_all_results = false);
+
     void parse(char *nom_fichier);
 
     /**
