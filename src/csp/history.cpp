@@ -45,7 +45,7 @@ csp::record &csp::history::get_record()
 
 bool csp::history::has_constraint()
 {
-    return !empty() && record_track.top().first != nullptr;
+    return !empty() && (record_track.top().first != nullptr);
 }
 const csp_variable_ptr csp::history::get_variable()
 {

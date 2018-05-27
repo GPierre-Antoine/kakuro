@@ -54,7 +54,7 @@ csp::solution csp::algorithm_backtrack::run(variable_vector &variables, constrai
 
         //on vérifie toutes les contraintes
         bool met_error = false;
-        for (const auto &constraint : constraints)
+        for (const auto &constraint : (*it_variable)->get_constraints())
         {
             tracker.inc_constraint_count();
             if (constraint->is_valuated() && !constraint->is_satisfied())

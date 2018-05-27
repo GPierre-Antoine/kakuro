@@ -55,6 +55,7 @@ namespace csp
         void release_last(std::size_t);
         void release_all();
         void add_constraint(csp_constraint_ptr);
+        constraint_vector &get_constraints();
         std::size_t get_constraint_count() const;
 
         typename domain_t::const_iterator cbegin() const;

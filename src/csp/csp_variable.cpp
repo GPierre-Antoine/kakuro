@@ -168,3 +168,7 @@ void csp::csp_variable::add_constraint(csp_constraint_ptr ptr)
 {
     constraints.push_back(ptr);
 }
+constraint_vector &csp::csp_variable::get_constraints()
+{
+    return constraints;
+}

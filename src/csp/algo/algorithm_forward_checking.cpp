@@ -6,7 +6,7 @@
 #include "../../ostream.h"
 #include "../history.h"
 
-//#define lf __FILE__ << ":" << std::setw(3) << __LINE__ << " # "
+#define lf std::string(__FILE__) + ":" + std::to_string(__LINE__) + " # "
 
 //void assert_variables_in_range_noempty(const_iter_v begin, const_iter_v end)
 //{
@@ -111,27 +111,44 @@ bool resolve_error_unfixed(const variable_vector &variables,
     }
 }
 
-bool resolve_error_with_constraint(const variable_vector &variables,
+bool resolve_error_with_constraint(variable_vector &variables,
                                    variable_vector::iterator &it_variable,
                                    csp::history &history)
 {
     auto begin = variables.begin();
+    auto end = variables.end();
+    //    std::cout << "\n" << lf << edit_fn(begin, end, edit_domain) << "\n";
+    std::vector<std::size_t> ids;
+    ids.reserve(variables.size());
+    ids.resize(static_cast<std::size_t>(std::distance(it_variable, end)));
+    std::transform(it_variable, end, ids.begin(), [](const csp_variable_ptr &var)
+    {
+        return var->get_id();
+    });
+
     for (;; std::advance(it_variable, -1))
     {
-        while (history && history.has_constraint() && !history.get_constraint()->has_a_empty_variable())
+        while (history
+            && ((history.has_constraint() && history.get_constraint()->has_a_empty_variable())
+                || (!history.has_constraint()
+                    && range_has_value(ids.begin(), ids.end(), history.get_variable()->get_id()))))
         {
             history.pop();
         }
+
         restrict_manual(*it_variable, history, (*it_variable)->get_id());
         if (!(*it_variable)->has_empty_domain())
         {
-            return true;
+            break;
         }
         if (it_variable == begin)
         {
             return false;
         }
+        ids.push_back((*it_variable)->get_id());
     }
+    //    std::cout << lf << edit_fn(begin, end, edit_domain) << "\n";
+    return true;
 }
 
 csp::algorithm_forward_checking::algorithm_forward_checking(bool find_all_results) : algorithm(std::string(
