@@ -34,10 +34,11 @@ bool apply_constraint(const csp_constraint_ptr &constraint, csp::history &histor
     return domain_size_after_constraint != 0;
 }
 
-void restrict_manual(csp_variable_ptr &f, csp::history &history, std::size_t timestamp)
+void restrict_manual(csp_variable_ptr &f, csp::history &history, csp::solution &tracker)
 {
     f->restrict_first();
-    history.track(nullptr, csp::record(record_type::manual, f, timestamp, 1));
+    tracker.inc_node_count();
+    history.track(nullptr, csp::record(record_type::manual, f, f->get_id(), 1));
 }
 
 inline bool range_has_value(std::vector<std::size_t>::const_iterator begin,
@@ -57,8 +58,7 @@ void rollback_unfixed_variables(const std::vector<std::size_t> &delete_values, c
 }
 
 bool resolve_error_unfixed(const variable_vector &variables,
-                           variable_vector::iterator &it_variable,
-                           csp::history &history)
+                           variable_vector::iterator &it_variable, csp::history &history, csp::solution &tracker)
 {
     auto begin = variables.begin();
     auto end = variables.end();
@@ -71,10 +71,9 @@ bool resolve_error_unfixed(const variable_vector &variables,
     for (;;)
     {
         rollback_unfixed_variables(unfixed, history);
-        restrict_manual(*it_variable, history, (*it_variable)->get_id());
+        restrict_manual(*it_variable, history, tracker);
         if (!(*it_variable)->has_empty_domain())
         {
-            //            assert_variables_in_range_noempty(begin, end);
             return true;
         }
         if (it_variable == begin)
@@ -111,7 +110,6 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables, c
     tracker.start_chrono();
     while (true)
     {
-        tracker.inc_node_count();
         //state is clear at the begining
 
         //check error
@@ -168,7 +166,7 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables, c
         //clear error and return to start
         if (met_error)
         {
-            if (!resolve_error_unfixed(variables, it_variable, history))
+            if (!resolve_error_unfixed(variables, it_variable, history, tracker))
             {
                 //if could not resolve error, exit
                 // <=> backtracked until first variable has empty domain
