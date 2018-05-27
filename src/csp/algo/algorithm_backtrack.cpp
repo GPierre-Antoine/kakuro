@@ -84,7 +84,7 @@ csp::solution csp::algorithm_backtrack::run(variable_vector &variables, constrai
         }
     }
     tracker.stop_chrono();
-    return std::move(tracker);
+    return tracker;
 }
 
 csp::algorithm_backtrack::algorithm_backtrack(bool find_all_results) : algorithm(std::string("Backtrack"),

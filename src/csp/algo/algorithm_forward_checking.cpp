@@ -16,7 +16,7 @@
  */
 void restrict_automatic(csp_variable_ptr &var, csp_constraint_ptr c, csp::history &history, std::size_t count)
 {
-    history.track(c, std::move(csp::record(record_type::automatic, var, var->get_id(), count)));
+    history.track(c, csp::record(record_type::automatic, var, var->get_id(), count));
 }
 
 bool apply_constraint(const csp_constraint_ptr &constraint, csp::history &history)
@@ -37,7 +37,7 @@ bool apply_constraint(const csp_constraint_ptr &constraint, csp::history &histor
 void restrict_manual(csp_variable_ptr &f, csp::history &history, std::size_t timestamp)
 {
     f->restrict_first();
-    history.track(nullptr, std::move(csp::record(record_type::manual, f, timestamp, 1)));
+    history.track(nullptr, csp::record(record_type::manual, f, timestamp, 1));
 }
 
 inline bool range_has_value(std::vector<std::size_t>::const_iterator begin,
@@ -181,6 +181,6 @@ csp::solution csp::algorithm_forward_checking::run(variable_vector &variables, c
         it_variable = std::next(it_variable);
     }
     tracker.stop_chrono();
-    return std::move(tracker);
+    return tracker;
 }
 
